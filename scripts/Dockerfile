@@ -30,6 +30,7 @@ RUN apt-get update && apt-get install -y \
     ros-humble-nav2-simple-commander \
     ros-humble-robot-localization \
     ros-humble-rqt-tf-tree \
+    ros-humble-laser-filters \
     ros-humble-ros2-control && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
  
