@@ -1,0 +1,16 @@
+joy_teleop:
+  ros__parameters:
+    move:
+      type: topic
+      interface_type: geometry_msgs/msg/TwistStamped
+      topic_name: /teleop_stamped
+      deadman_buttons: [5]
+      axis_mappings:
+        twist-linear-x:
+          axis: 1
+          scale: 0.055
+          offset: 0.0
+        twist-angular-z:
+          axis: 3
+          scale: 0.1
+          offset: 0.0
