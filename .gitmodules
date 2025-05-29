@@ -1,0 +1,4 @@
+[submodule "nhatbot_drivers/rplidar_ros"]
+	path = nhatbot_drivers/rplidar_ros
+	url = https://github.com/Slamtec/rplidar_ros.git 
+ 	branch = ros2
