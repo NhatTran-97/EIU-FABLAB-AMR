@@ -1,0 +1,27 @@
+zlac_driver_node:
+  ros__parameters:
+    connection_type: "rtu"
+    modbus_port: "/dev/ttyUSB0"
+    modbus_baudrate: 115200
+    joint_state_topic: "/nhatbot/JointState"
+    wheel_rotation_topic: "/nhatbot/wheel_rotational_vel"
+    zlac_status_topic: "/nhatbot/zlac_status"
+    reset_encoder_service: "/nhatbot/reset_feedback_position"
+    
+    joint_state_frequency: 0.1
+    set_accel_time: 1000 #  Motor acceleration time
+    set_decel_time: 1000 #  Motor deceleration time
+    set_operation_mode: 3 # 3: Velocity mode
+    set_stop_rpm: 0
+    set_clear_wheel_encoders: 3 # 3: Reset wheel encoders for both wheels
+    ignore_small_speed_threshold: 0.5 # Ignore small speed below 0.4 RPM
+
+    max_rpm: 200
+    travel_in_one_rev: 0.336
+    cpr: 4096
+    wheel_radius: 0.0535
+
+
+
+
+
