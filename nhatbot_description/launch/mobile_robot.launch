@@ -1,0 +1,5 @@
+<launch>
+    <node pkg="autonomous_mobile" type ="Serial_communicate.py" name="serial" output = "screen" ></node>
+    <node pkg="autonomous_mobile" type ="odom.py" name="odometry" output = "screen" ></node>
+
+</launch>

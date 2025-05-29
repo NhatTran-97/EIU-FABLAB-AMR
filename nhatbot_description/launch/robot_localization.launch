@@ -1,0 +1,7 @@
+<launch>
+
+    <!-- Run the EKF Localization node -->
+    <node pkg="robot_localization" type="ekf_localization_node" name="ekf_navigation_node">
+        <rosparam command="load" file="$(find autonomous_mobile)/config/ekf_localization.yaml"/>
+    </node>
+</launch>

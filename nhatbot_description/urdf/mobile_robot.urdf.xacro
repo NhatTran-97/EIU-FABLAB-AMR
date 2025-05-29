@@ -1,0 +1,587 @@
+<robot name="mobile_robot" xmlns:xacro="https://www.ros.org/wiki/xacro" >
+
+    <xacro:include filename="$(find autonomous_mobile)/urdf/materials.xacro" />
+    <!-- <xacro:include filename="$(find two_wheeled_description)/urdf/2wheeled.gazebo" /> -->
+
+    <!-- <xacro:include filename="$(find autonomous_mobile)/urdf/mobile_robot.gazebo" /> -->
+  
+    <link
+    name="base_link">
+
+    <inertial>
+      <origin
+        xyz="7.9994E-17 -1.5842E-18 -0.005"
+        rpy="0 0 0" />
+      <mass
+        value="1.5875" />
+      <inertia
+        ixx="0.020119"
+        ixy="-1.7258E-07"
+        ixz="2.3337E-18"
+        iyy="0.020108"
+        iyz="7.9887E-19"
+        izz="0.0402" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://autonomous_mobile/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="255 255 255 0.8" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://autonomous_mobile/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  
+    <!-- Create wheel right -->
+  
+    <link
+    name="Left_Link">
+    <inertial>
+      <origin
+        xyz="2.56580471721162E-07 -0.00251496056873571 0.000586346785237397"
+        rpy="0 0 0" />
+      <mass
+        value="0.0892945801008747" />
+      <inertia
+        ixx="8.11249890562634E-05"
+        ixy="3.37277796324178E-11"
+        ixz="-2.23479404350853E-09"
+        iyy="0.000153384365583778"
+        iyz="5.41431659170738E-12"
+        izz="8.11385516632443E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://autonomous_mobile/meshes/Left_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.109803921568627 0.109803921568627 0.109803921568627 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://autonomous_mobile/meshes/Left_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Left_Joint"
+    type="continuous">
+    <origin
+      xyz="4.6243E-05 0.20855 -0.18309"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="Left_Link" />
+    <axis
+      xyz="0 1 0" />
+    <dynamics
+      damping="1"
+      friction="0" />
+  </joint>
+  <link
+    name="Right_Link">
+    <inertial>
+      <origin
+        xyz="2.56580471804097E-07 0.0125149605687355 4.11888338783251E-08"
+        rpy="0 0 0" />
+      <mass
+        value="0.0892945801008746" />
+      <inertia
+        ixx="8.11249890562634E-05"
+        ixy="-3.37277796322769E-11"
+        ixz="-2.23479404353763E-09"
+        iyy="0.000153384365583778"
+        iyz="-5.41431658866222E-12"
+        izz="8.11385516632442E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://autonomous_mobile/meshes/Right_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.109803921568627 0.109803921568627 0.109803921568627 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://autonomous_mobile/meshes/Right_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Right_Joint"
+    type="continuous">
+    <origin
+      xyz="4.6243E-05 -0.21855 -0.1825"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="Right_Link" />
+    <axis
+      xyz="0 -1 0" />
+  </joint>
+  <link
+    name="Lidar_Link">
+    <inertial>
+      <origin
+        xyz="4978007318528.8 -10729112138308 -187717557112.41"
+        rpy="0 0 0" />
+      <mass
+        value="1.95351824724178E+20" />
+      <inertia
+        ixx="1.49963892672428E+45"
+        ixy="6.95577504852059E+44"
+        ixz="1.2169889577998E+43"
+        iyy="3.23187385688887E+44"
+        iyz="-2.62297947026234E+43"
+        izz="1.821908474493E+45" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://autonomous_mobile/meshes/Lidar_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0 0 0 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://autonomous_mobile/meshes/Lidar_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Lidar_Joint"
+    type="fixed">
+    <origin
+      xyz="0.16304 -0.0026486 0.0705"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="Lidar_Link" />
+    <axis
+      xyz="0 0 0" />
+     
+  </joint>
+  <link
+    name="IMU_Link">
+    <inertial>
+      <origin
+        xyz="0.000414693990674134 -9.62841896520773E-05 -0.000586751245583272"
+        rpy="0 0 0" />
+      <mass
+        value="0.000983130183652038" />
+      <inertia
+        ixx="2.72841472066427E-08"
+        ixy="3.55358217078538E-10"
+        ixz="1.83406122618532E-11"
+        iyy="4.80392806824561E-08"
+        iyz="1.51853652206049E-12"
+        izz="7.48563776021965E-08" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://autonomous_mobile/meshes/IMU_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0 0 255 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://autonomous_mobile/meshes/IMU_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="IMU_Joint"
+    type="fixed">
+    <origin
+      xyz="0.089735 -0.0014712 0.00165"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="IMU_Link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="Foot_Link">
+    <inertial>
+      <origin
+        xyz="0.00279614126296664 4.31703021974476E-08 0.000369170534598178"
+        rpy="0 0 0" />
+      <mass
+        value="2.16979851265338" />
+      <inertia
+        ixx="0.0223726281861936"
+        ixy="-1.77275151346262E-12"
+        ixz="6.45574431107625E-13"
+        iyy="0.020240452587419"
+        iyz="-6.42544904571654E-14"
+        izz="0.0425428642557266" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://autonomous_mobile/meshes/Foot_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.435294117647059 0 0 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://autonomous_mobile/meshes/Foot_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Foot_joint"
+    type="fixed">
+    <origin
+      xyz="4.6243E-05 0 -0.14"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="Foot_Link" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link
+    name="Box_Link">
+    <inertial>
+      <origin
+        xyz="-0.223593326666151 -0.00821017598167047 1.38777878078145E-17"
+        rpy="0 0 0" />
+      <mass
+        value="1.93259283953463" />
+      <inertia
+        ixx="0.00344200801128419"
+        ixy="-4.00341652190273E-17"
+        ixz="7.86292357789957E-19"
+        iyy="0.0034420080112842"
+        iyz="4.1857496761314E-19"
+        izz="0.000994208482995775" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://autonomous_mobile/meshes/Box_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://autonomous_mobile/meshes/Box_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Box_Joint"
+    type="fixed">
+    <origin
+      xyz="0.223593326666151 0.00821017598167089 0.0699999999999998"
+      rpy="0 0 0" />
+    <parent
+      link="Foot_Link" />
+    <child
+      link="Box_Link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="LeftMotor_Link">
+    <inertial>
+      <origin
+        xyz="-1.57757571021463E-17 0.00731223529023786 0.00148870756111859"
+        rpy="0 0 0" />
+      <mass
+        value="0.218472479568782" />
+      <inertia
+        ixx="0.000287506174126785"
+        ixy="-1.60753383341994E-20"
+        ixz="-1.23336621420854E-21"
+        iyy="6.02990383658385E-05"
+        iyz="6.05020165488567E-08"
+        izz="0.000284335337053971" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://autonomous_mobile/meshes/LeftMotor_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://autonomous_mobile/meshes/LeftMotor_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="LeftMotor_Link"
+    type="fixed">
+    <origin
+      xyz="0 0.120702484422015 -0.0425000000000002"
+      rpy="0 0 0" />
+    <parent
+      link="Foot_Link" />
+    <child
+      link="LeftMotor_Link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="RightMotor_Link">
+    <inertial>
+      <origin
+        xyz="-3.99796537775702E-17 -0.00731223529023786 0.00148870756111854"
+        rpy="0 0 0" />
+      <mass
+        value="0.218472479568782" />
+      <inertia
+        ixx="0.000287506174126786"
+        ixy="2.22008793306081E-20"
+        ixz="-2.56696317113305E-21"
+        iyy="6.02990383658385E-05"
+        iyz="-6.05020165488951E-08"
+        izz="0.000284335337053972" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://autonomous_mobile/meshes/RightMotor_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://autonomous_mobile/meshes/RightMotor_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="RightMotor_Joint"
+    type="fixed">
+    <origin
+      xyz="0 -0.120702484422014 -0.0424999999999996"
+      rpy="0 0 0" />
+    <parent
+      link="Foot_Link" />
+    <child
+      link="RightMotor_Link" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="Front_Caster_Link">
+    <inertial>
+      <origin
+        xyz="0.00725674479853172 -8.08709894582268E-05 -0.0237937277867639"
+        rpy="0 0 0" />
+      <mass
+        value="0.0437082059565773" />
+      <inertia
+        ixx="1.80786108044674E-05"
+        ixy="1.93915052461112E-08"
+        ixz="3.51041121049147E-06"
+        iyy="1.98184107345125E-05"
+        iyz="-3.91208137690429E-08"
+        izz="7.73194436421823E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://autonomous_mobile/meshes/Front_Caster_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://autonomous_mobile/meshes/Front_Caster_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="Front_Caster_Joint"
+    type="continuous">
+    <origin
+      xyz="0.19144 -1.3765E-05 -0.17494"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="Front_Caster_Link" />
+    <axis
+      xyz="0 0 1" />
+  </joint>
+  <link
+    name="After_Caster_Link">
+    <inertial>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="0" />
+      <inertia
+        ixx="0"
+        ixy="0"
+        ixz="0"
+        iyy="0"
+        iyz="0"
+        izz="0" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://autonomous_mobile/meshes/After_Caster_Link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://autonomous_mobile/meshes/After_Caster_Link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="After_Caster_Joint"
+    type="continuous">
+    <origin
+      xyz="-0.191338002066182 0.000137281469252824 -0.174941715352257"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="After_Caster_Link" />
+    <axis
+      xyz="0 0 1" />
+    <joint_properties damping="1.0" friction="1.0"/>
+  </joint>
+  </robot>

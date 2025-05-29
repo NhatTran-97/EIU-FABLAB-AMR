@@ -1,0 +1,63 @@
+<robot name="odom" xmlns:xacro="https://www.ros.org/wiki/xacro" >
+
+    <xacro:include filename="$(find autonomous_mobile)/urdf/materials.xacro" />
+    <!-- <xacro:include filename="$(find two_wheeled_description)/urdf/2wheeled.gazebo" /> -->
+
+    <!-- <xacro:include filename="$(find autonomous_mobile)/urdf/mobile_robot.gazebo" /> -->
+  
+    <link name="odom">
+
+    <inertial>
+      <origin
+        xyz="7.9994E-17 -1.5842E-18 -0.005"
+        rpy="0 0 0" />
+      <mass
+        value="1.5875" />
+      <inertia
+        ixx="0.020119"
+        ixy="-1.7258E-07"
+        ixz="2.3337E-18"
+        iyy="0.020108"
+        iyz="7.9887E-19"
+        izz="0.0402" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://autonomous_mobile/meshes/Machine Coordinate System.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="255 255 255 0.8" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://autonomous_mobile/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint
+  name="odom_joint"
+  type="fixed">
+  <origin
+    xyz="0.16304 -0.0026486 0.0705"
+    rpy="0 0 0" />
+  <parent
+    link="odom" />
+  <child
+    link="base_link" />
+  <axis
+    xyz="0 0 0" />
+   
+</joint>
+</robot>

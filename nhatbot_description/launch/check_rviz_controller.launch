@@ -1,0 +1,15 @@
+<launch>
+    <!-- <arg name="model" /> -->
+   <!-- <node
+      name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" /> -->
+    <param
+      name="robot_description" textfile="$(find autonomous_mobile)/urdf/mobile_robot.urdf.xacro" />
+      
+    <node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" />
+    <node
+      name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+    <node
+      name="rviz" pkg="rviz" type="rviz" args="-d $(find autonomous_mobile)/urdf.rviz" />
+
+  </launch>
