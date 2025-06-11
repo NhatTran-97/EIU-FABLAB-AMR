@@ -7,7 +7,8 @@
 
 // Constructor
 MotorController::MotorController() : Node("motor_controller_node"),  wheel_radius_(0.0535), wheel_separation_(0.45), 
-                                                                linear_velocity_max_(0.5),angular_velocity_max_(0.5)
+                                                                linear_velocity_max_(0.5),angular_velocity_max_(0.5),
+                                                                cmd_timeout_sec_(0.25), last_cmd_was_zero_(false)
 {
     // Declare and retrieve robot physical parameters
 
@@ -26,6 +27,12 @@ MotorController::MotorController() : Node("motor_controller_node"),  wheel_radiu
 
     RCLCPP_INFO(this->get_logger(), "Using wheel_radius: %.4f, wheel_separation: %.4f", wheel_radius_, wheel_separation_);
 
+    // Init timeout
+
+    last_cmd_time_ = this->now();
+    timeout_timer_ = this->create_wall_timer(std::chrono::milliseconds(100),std::bind(&MotorController::check_cmd_timeout, this));
+
+
     // Define a QoS (Quality of Service) profile for subscriptions and publishers
 
     rclcpp::QoS qos(rclcpp::KeepLast(10));
@@ -43,6 +50,8 @@ MotorController::MotorController() : Node("motor_controller_node"),  wheel_radiu
     wheel_cmd_pub_ = this->create_publisher<std_msgs::msg::Float64MultiArray>("nhatbot/wheel_rotational_vel", qos_cmd);
 
 
+
+
     // Build the conversion matrix from wheel angular velocities (phi_r, phi_l) to robot velocities (v, omega)
     speed_conversion_ << 
     wheel_radius_ / 2.0,                  wheel_radius_ / 2.0,
@@ -58,6 +67,24 @@ MotorController::~MotorController()
     RCLCPP_INFO(this->get_logger(), "🛑 MotorController node is stopping...");
 }
 
+
+
+
+void MotorController::check_cmd_timeout()
+    {
+        rclcpp::Time now = this->now();
+        if ((now - last_cmd_time_).seconds() > cmd_timeout_sec_ && !last_cmd_was_zero_)
+        {
+            std_msgs::msg::Float64MultiArray stop_msg;
+            stop_msg.data = {0.0, 0.0};
+            wheel_cmd_pub_->publish(stop_msg);
+            last_cmd_was_zero_ = true;
+            // RCLCPP_WARN(this->get_logger(), "⏱️ No cmd_vel received for %.2f s → auto stop", cmd_timeout_sec_);
+        }
+    }
+
+
+
 // Callback function to handle velocity commands
 void MotorController::vel_callback(const geometry_msgs::msg::TwistStamped::SharedPtr msg)
 {
@@ -67,6 +94,8 @@ void MotorController::vel_callback(const geometry_msgs::msg::TwistStamped::Share
      Uses a pre-defined speed_conversion_ matrix for flexible anf clarity
     */
 
+    
+
     // Validate input to avoid NaN or infinite values
     if (std::isnan(msg->twist.linear.x) || std::isinf(msg->twist.linear.x) ||
         std::isnan(msg->twist.angular.z) || std::isinf(msg->twist.angular.z))
@@ -74,6 +103,22 @@ void MotorController::vel_callback(const geometry_msgs::msg::TwistStamped::Share
         RCLCPP_WARN(this->get_logger(), "⚠️ Invalid cmd_vel: NaN or Inf detected. Ignoring this command.");
         return;
     }
+    // RCLCPP_INFO(get_logger(), "Linear: %.2f | Angular: %.2f", msg->twist.linear.x, msg->twist.angular.z);
+
+    last_cmd_time_ = this->now();
+    last_cmd_was_zero_ = false;
+
+    // Stop the robot if both linear.x and angular.z are zero
+    constexpr double EPSILON = 1e-4;
+    if (std::abs(msg->twist.linear.x) < EPSILON && std::abs(msg->twist.angular.z) < EPSILON)
+    {
+        std_msgs::msg::Float64MultiArray stop_msg;
+        stop_msg.data = {0.0, 0.0};
+        wheel_cmd_pub_->publish(stop_msg);
+        // RCLCPP_INFO(get_logger(), "🛑 Received zero cmd_vel → stopping robot.");
+        return;
+    }
+
 
     // Clamp input velocities to a safe range to avoid sending extreme values to motors
     double linear_x = std::clamp(msg->twist.linear.x, -linear_velocity_max_, linear_velocity_max_);
@@ -87,22 +132,21 @@ void MotorController::vel_callback(const geometry_msgs::msg::TwistStamped::Share
 
     
     // Prepare message to send to motor driver
+
     std_msgs::msg::Float64MultiArray wheel_speed_msg;
+    
 
     wheel_speed_msg.data = {
         static_cast<float>(wheel_speed.coeff(0)),  // left wheel
         static_cast<float>(wheel_speed.coeff(1))   // right wheel 
     };
 
-    // Safety check to ensure message has exactly 2 elements (left, right)
+    // Ensure wheel_speed_msg contains exactly 2 elements: [left, right]
     if (wheel_speed_msg.data.size() != 2)
     {
         RCLCPP_ERROR(this->get_logger(), "❌ wheel_speed_msg must have exactly 2 elements (left, right), but got %ld", wheel_speed_msg.data.size());
-        return;
+        wheel_speed_msg.data = {0.0, 0.0};
     }
-
-    // RCLCPP_INFO(this->get_logger(), "🚗 Wheel Speeds [rad/s] → Left: %.3f | Right: %.3f",
-    //         wheel_speed_msg.data[0], wheel_speed_msg.data[1]);
 
     // Publish computed wheel speeds
     wheel_cmd_pub_->publish(wheel_speed_msg);

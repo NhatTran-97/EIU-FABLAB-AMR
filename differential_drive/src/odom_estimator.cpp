@@ -50,6 +50,8 @@ OdomEstimator::OdomEstimator() : Node("odom_estimator_node"),
     // Create publisher for Odometry messages
     odom_pub_ = this->create_publisher<nav_msgs::msg::Odometry>("nhatbot/odom", qos_wheel_jointState);
 
+    transform_timer_ = this->create_wall_timer(std::chrono::milliseconds(50), std::bind(&OdomEstimator::publish_transform, this) );
+
 
     // Initialize Odometry message with static frame information
     odom_msg.header.frame_id = "odom";
@@ -95,19 +97,13 @@ void OdomEstimator::joint_callback(const sensor_msgs::msg::JointState::SharedPtr
     }
     
     // Use timestamp from message, or fallback if invalid
-    // rclcpp::Time current_time = msg->header.stamp;
+    rclcpp::Time current_time = msg->header.stamp;
 
-    // if (current_time == rclcpp::Time(0)) 
-    // {
-    //     RCLCPP_WARN(this->get_logger(), "⚠️ JointState has no timestamp, using now()");
-    //     current_time = this->now();
-    // }
-
-    rclcpp::Time current_time;
     if (msg->header.stamp.sec == 0 && msg->header.stamp.nanosec == 0) 
     {
-        RCLCPP_WARN(this->get_logger(), "⚠️ JointState has no timestamp, using now()");
-        current_time = get_clock()->now();  
+        RCLCPP_WARN(this->get_logger(), "⚠️ JointState has no timestamp");
+        return;
+    
     } else 
     {
         current_time = msg->header.stamp; 
@@ -157,7 +153,7 @@ void OdomEstimator::update_odometry(double phi_left, double phi_right, double dt
 {
     // Compute the linear and angular velocity
     double linear_velocity = wheel_radius_ * (phi_right + phi_left) / 2.0;
-    double angular_velocity = wheel_radius_ * (phi_right - phi_left) / wheel_separation_;
+    double angular_velocity = wheel_radius_ * (phi_left - phi_right ) / wheel_separation_;
 
     // Low-pass filter and angular velocity of the robot
     double alpha = 0.2;
@@ -185,54 +181,29 @@ void OdomEstimator::update_odometry(double phi_left, double phi_right, double dt
 
     // Publish both odometry and transform
     this->publish_odom();
-    if(enable_tf_broadcast_)
-    {
 
-        this->publish_transform();
-    
-    }
     
 }
 
-// Publish nav_msgs/Odometry with current pose and twist
-void OdomEstimator::publish_odom()
-{
-    tf2::Quaternion q;
-    q.setRPY(0, 0, theta_);
+// void OdomEstimator::publish_transform()
+// {
+//     if(enable_tf_broadcast_)
+//     {
 
-    odom_msg.header.stamp = get_clock()->now();
-    odom_msg.pose.pose.position.x = x_;
-    odom_msg.pose.pose.position.y = y_;
-
-    // Assign quaternion orientation
-    // odom_msg.pose.pose.orientation = tf2::toMsg(q);
-   
-    odom_msg.pose.pose.orientation.x = 0.0; //q.getX();
-    odom_msg.pose.pose.orientation.y = 0.0; //q.getY();
-    odom_msg.pose.pose.orientation.z = std::sin(theta_ / 2.0); //q.getZ();
-    odom_msg.pose.pose.orientation.w = std::cos(theta_ / 2.0);  //q.getW();
-
-    // Position uncertainty
-    odom_msg.pose.covariance[0] = 0.2; ///< x
-    odom_msg.pose.covariance[7] = 0.2; ///< y
-    odom_msg.pose.covariance[35] = 0.4;  ///< yaw
-
-    // Assign linear and angular velocity
-    odom_msg.twist.twist.linear.x = linear_filtered_;
-    odom_msg.twist.twist.linear.y = 0.0;
-    odom_msg.twist.twist.angular.z = angular_filtered_;
+//         this->publish_transform();
     
+//     }
+// }
 
-    odom_pub_->publish(odom_msg);
 
-}
 
-// Broadcast transform from "odom" -> "base_link" using the current pose
 void OdomEstimator::publish_transform()
 {
-    
+    if (!enable_tf_broadcast_) return;
+
     tf2::Quaternion q;
     q.setRPY(0, 0, theta_);
+    q.normalize(); 
 
     transform_stamped_.transform.translation.x = x_;
     transform_stamped_.transform.translation.y = y_;
@@ -253,6 +224,47 @@ void OdomEstimator::publish_transform()
     
 }
 
+// Publish nav_msgs/Odometry with current pose and twist
+void OdomEstimator::publish_odom()
+{
+    tf2::Quaternion q;
+    q.setRPY(0, 0, theta_);
+    q.normalize(); 
+
+    odom_msg.header.stamp = get_clock()->now();
+    odom_msg.pose.pose.position.x = x_;
+    odom_msg.pose.pose.position.y = y_;
+
+    // Assign quaternion orientation
+    // odom_msg.pose.pose.orientation = tf2::toMsg(q);
+   
+    // odom_msg.pose.pose.orientation.x = 0.0; //q.getX();
+    // odom_msg.pose.pose.orientation.y = 0.0; //q.getY();
+    // odom_msg.pose.pose.orientation.z = std::sin(theta_ / 2.0); //q.getZ();
+    // odom_msg.pose.pose.orientation.w = std::cos(theta_ / 2.0);  //q.getW();
+
+    odom_msg.pose.pose.orientation.x = q.getX();
+    odom_msg.pose.pose.orientation.y = q.getY();
+    odom_msg.pose.pose.orientation.z = q.getZ();
+    odom_msg.pose.pose.orientation.w = q.getW();
+
+    // Position uncertainty
+    odom_msg.pose.covariance[0] = 0.2; ///< x
+    odom_msg.pose.covariance[7] = 0.2; ///< y
+    odom_msg.pose.covariance[35] = 0.4;  ///< yaw
+
+    // Assign linear and angular velocity
+    odom_msg.twist.twist.linear.x = linear_filtered_;
+    odom_msg.twist.twist.linear.y = 0.0;
+    odom_msg.twist.twist.angular.z = angular_filtered_;
+    
+    odom_pub_->publish(odom_msg);
+
+}
+
+// Broadcast transform from "odom" -> "base_link" using the current pose
+
+
 
 
 // Reset the odoemtry estimate (called if encoder reset detected)
@@ -260,7 +272,7 @@ void OdomEstimator::reset_odom()
 {
     x_ = y_ = theta_ = 0.0;
     left_wheel_prev_pos_ = right_wheel_prev_pos_ = 0.0;
-    prev_time_ = get_clock()->now();
+    // prev_time_ = get_clock()->now();
     linear_filtered_ = 0.0;
     angular_filtered_ = 0.0;
 
