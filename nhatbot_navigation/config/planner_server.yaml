@@ -1,0 +1,48 @@
+planner_server:
+  ros__parameters:
+    use_sim_time: false
+    expected_planner_frequency: 1.0    # Expected planning frequency (Hz)
+    planner_plugins: ["GridBased"]     # Global planner plugin(s) to use
+
+    # GridBased planner (NavFn/Dijkstra's algorithm)
+    GridBased:
+      plugin: "nav2_navfn_planner/NavfnPlanner"
+      tolerance: 0.5                  # Goal tolerance in meters
+      use_astar: true                
+      allow_unknown: true             # Allow planning through unknown space
+
+
+global_costmap:
+  global_costmap:
+    ros__parameters:
+      update_frequency: 1.0
+      publish_frequency: 1.0
+      global_frame: map                  
+      robot_base_frame: base_link
+      use_sim_time: false                  
+      robot_radius: 0.255
+      resolution: 0.05
+      track_unknown_space: true
+      always_send_full_costmap: true
+
+      plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
+
+      static_layer:
+        plugin: "nav2_costmap_2d::StaticLayer"
+        map_subscribe_transient_local: true
+
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        cost_scaling_factor: 3.0
+        inflation_radius: 0.52
+
+      obstacle_layer:
+        plugin: "nav2_costmap_2d::ObstacleLayer"
+        enabled: true
+        observation_sources: "scan"
+        scan:
+          topic: /scan_filtered
+          data_type: "LaserScan"
+          clearing: true
+          marking: true
+          max_obstacle_height: 2.0
