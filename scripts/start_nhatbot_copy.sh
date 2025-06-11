@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# set -euo pipefail
 
 # Docker image name
 DOCKER_IMAGE="nhatbot:latest"
@@ -16,8 +15,7 @@ xhost +local:root
 
 log_info()  { echo -e "ℹ️  $1"; }
 log_ok()    { echo -e "✅ $1"; }
-log_fail()  { echo -e "❌ $1" >&2; exit 1; }
-
+log_fail()  { echo -e "❌ $1" >&2; return 1; }
 
 
 # Check if the Docker image exists
@@ -28,7 +26,6 @@ fi
 # Fixed serial numbers for the devices
 ZLAC_SERIAL="AB0PJ5HV"
 LIDAR_SERIAL="0001"
-
 
 
 log_info "Scanning for ZLAC device..."
