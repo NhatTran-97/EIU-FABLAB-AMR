@@ -1,6 +1,6 @@
 <robot name="mobile_robot" xmlns:xacro="https://www.ros.org/wiki/xacro" >
 
-    <xacro:include filename="$(find autonomous_mobile)/urdf/materials.xacro" />
+    <xacro:include filename="$(find nhatbot_description)/urdf/materials.xacro" />
     <!-- <xacro:include filename="$(find two_wheeled_description)/urdf/2wheeled.gazebo" /> -->
 
     <!-- <xacro:include filename="$(find autonomous_mobile)/urdf/mobile_robot.gazebo" /> -->
@@ -28,7 +28,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://autonomous_mobile/meshes/base_link.STL" />
+          filename="package://nhatbot_description/meshes/base_link.STL" />
       </geometry>
       <material
         name="">
@@ -42,7 +42,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://autonomous_mobile/meshes/base_link.STL" />
+          filename="package://nhatbot_description/meshes/base_link.STL" />
       </geometry>
     </collision>
   </link>
@@ -71,7 +71,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://autonomous_mobile/meshes/Left_Link.STL" />
+          filename="package://nhatbot_description/meshes/Left_Link.STL" />
       </geometry>
       <material
         name="">
@@ -85,7 +85,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://autonomous_mobile/meshes/Left_Link.STL" />
+          filename="package://nhatbot_description/meshes/Left_Link.STL" />
       </geometry>
     </collision>
   </link>
@@ -127,7 +127,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://autonomous_mobile/meshes/Right_Link.STL" />
+          filename="package://nhatbot_description/meshes/Right_Link.STL" />
       </geometry>
       <material
         name="">
@@ -141,7 +141,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://autonomous_mobile/meshes/Right_Link.STL" />
+          filename="package://nhatbot_description/meshes/Right_Link.STL" />
       </geometry>
     </collision>
   </link>
@@ -180,7 +180,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://autonomous_mobile/meshes/Lidar_Link.STL" />
+          filename="package://nhatbot_description/meshes/Lidar_Link.STL" />
       </geometry>
       <material
         name="">
@@ -194,7 +194,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://autonomous_mobile/meshes/Lidar_Link.STL" />
+          filename="package://nhatbot_description/meshes/Lidar_Link.STL" />
       </geometry>
     </collision>
   </link>
@@ -234,7 +234,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://autonomous_mobile/meshes/IMU_Link.STL" />
+          filename="package://nhatbot_description/meshes/IMU_Link.STL" />
       </geometry>
       <material
         name="">
@@ -248,7 +248,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://autonomous_mobile/meshes/IMU_Link.STL" />
+          filename="package://nhatbot_description/meshes/IMU_Link.STL" />
       </geometry>
     </collision>
   </link>
@@ -287,7 +287,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://autonomous_mobile/meshes/Foot_Link.STL" />
+          filename="package://nhatbot_description/meshes/Foot_Link.STL" />
       </geometry>
       <material
         name="">
@@ -301,7 +301,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://autonomous_mobile/meshes/Foot_Link.STL" />
+          filename="package://nhatbot_description/meshes/Foot_Link.STL" />
       </geometry>
     </collision>
   </link>
@@ -340,7 +340,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://autonomous_mobile/meshes/Box_Link.STL" />
+          filename="package://nhatbot_description/meshes/Box_Link.STL" />
       </geometry>
       <material
         name="">
@@ -354,7 +354,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://autonomous_mobile/meshes/Box_Link.STL" />
+          filename="package://nhatbot_description/meshes/Box_Link.STL" />
       </geometry>
     </collision>
   </link>
@@ -393,7 +393,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://autonomous_mobile/meshes/LeftMotor_Link.STL" />
+          filename="package://nhatbot_description/meshes/LeftMotor_Link.STL" />
       </geometry>
       <material
         name="">
@@ -407,7 +407,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://autonomous_mobile/meshes/LeftMotor_Link.STL" />
+          filename="package://nhatbot_description/meshes/LeftMotor_Link.STL" />
       </geometry>
     </collision>
   </link>
@@ -446,7 +446,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://autonomous_mobile/meshes/RightMotor_Link.STL" />
+          filename="package://nhatbot_description/meshes/RightMotor_Link.STL" />
       </geometry>
       <material
         name="">
@@ -460,7 +460,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://autonomous_mobile/meshes/RightMotor_Link.STL" />
+          filename="package://nhatbot_description/meshes/RightMotor_Link.STL" />
       </geometry>
     </collision>
   </link>
@@ -499,7 +499,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://autonomous_mobile/meshes/Front_Caster_Link.STL" />
+          filename="package://nhatbot_description/meshes/Front_Caster_Link.STL" />
       </geometry>
       <material
         name="">
@@ -513,7 +513,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://autonomous_mobile/meshes/Front_Caster_Link.STL" />
+          filename="package://nhatbot_description/meshes/Front_Caster_Link.STL" />
       </geometry>
     </collision>
   </link>
@@ -552,7 +552,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://autonomous_mobile/meshes/After_Caster_Link.STL" />
+          filename="package://nhatbot_description/meshes/After_Caster_Link.STL" />
       </geometry>
       <material
         name="">
@@ -566,7 +566,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://autonomous_mobile/meshes/After_Caster_Link.STL" />
+          filename="package://nhatbot_description/meshes/After_Caster_Link.STL" />
       </geometry>
     </collision>
   </link>
