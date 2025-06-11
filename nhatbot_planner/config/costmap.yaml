@@ -4,31 +4,37 @@ costmap:
     publish_frequency: 1.0
     global_frame: map
     robot_base_frame: base_link
-    use_sim_time: true
-    robot_radius: 0.1
+    use_sim_time: false
+    robot_radius: 0.255
     resolution: 0.05
+    always_send_full_costmap: True
     track_unknown_space: true
-    plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
+
+    plugins: ["static_layer", "obstacle_layer", inflation_layer]
+
     static_layer:
       plugin: "nav2_costmap_2d::StaticLayer"
       map_topic: /map
       map_subscribe_transient_local: True
+
     obstacle_layer:
       plugin: "nav2_costmap_2d::ObstacleLayer"
       enabled: True
-      observation_sources: scan
-      scan:
-        topic: /scan
+      observation_sources: scan   # observation source is the scan 
+      scan:   # Specific configuration 
+        topic: /scan_filtered 
+        data_type: "LaserScan"
         max_obstacle_height: 2.0
         clearing: True
-        marking: True
-        data_type: "LaserScan"
+        marking: True # Enables the usage of the Bresham al that clears the cells of the map where no obstacles are detected 
+        combination_method: 1
         raytrace_max_range: 3.0
         raytrace_min_range: 0.0
         obstacle_max_range: 2.5
         obstacle_min_range: 0.0
+
     inflation_layer:
       plugin: "nav2_costmap_2d::InflationLayer"
       cost_scaling_factor: 3.0
-      inflation_radius: 0.55
-    always_send_full_costmap: True
+      inflation_radius: 0.55 # At least >= robot_radius (55cm)
+   

@@ -100,7 +100,7 @@ class AStarPlanner(Node):
                 break 
 
             for dir_x, dir_y in explore_directions:
-                new_node : GraphNode = active_node + + (dir_x, dir_y)
+                new_node : GraphNode = active_node +  (dir_x, dir_y)
                 if new_node not in visited_nodes and self.pose_on_map(new_node) and self.map_.data[self.pose_to_cell(new_node) == 0]:
                     new_node.cost =  active_node.cost + 1
                     new_node.heuristic = self.manhattan_distance(new_node, goal_node)

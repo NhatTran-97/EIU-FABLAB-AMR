@@ -12,25 +12,12 @@ def generate_launch_description():
 
     use_sim_time = LaunchConfiguration("use_sim_time")
     lifecycle_nodes = [ "planner_server", "smoother_server"]
-    bumperbot_navigation_pkg = get_package_share_directory("nhatbot_planner")
+    nhatbot_navigation_pkg = get_package_share_directory("nhatbot_planner")
 
     use_sim_time_arg = DeclareLaunchArgument(
         "use_sim_time",
-        default_value="true"
-    )
+        default_value="false")
 
-    # nav2_controller_server = Node(
-    #     package="nav2_controller",
-    #     executable="controller_server",
-    #     output="screen",
-    #     parameters=[
-    #         os.path.join(
-    #             bumperbot_navigation_pkg,
-    #             "config",
-    #             "controller_server.yaml"),
-    #         {"use_sim_time": use_sim_time}
-    #     ],
-    # )
     
     nav2_planner_server = Node(
         package="nav2_planner",
@@ -39,7 +26,7 @@ def generate_launch_description():
         output="screen",
         parameters=[
             os.path.join(
-                bumperbot_navigation_pkg,
+                nhatbot_navigation_pkg,
                 "config",
                 "planner_server.yaml"),
             {"use_sim_time": use_sim_time}
@@ -47,19 +34,19 @@ def generate_launch_description():
     )
 
 
-    nav2_smoother_server = Node(
-        package="nav2_smoother",
-        executable="smoother_server",
-        name="smoother_server",
-        output="screen",
-        parameters=[
-            os.path.join(
-                bumperbot_navigation_pkg,
-                "config",
-                "smoother_server.yaml"),
-            {"use_sim_time": use_sim_time}
-        ],
-    )
+    # nav2_smoother_server = Node(
+    #     package="nav2_smoother",
+    #     executable="smoother_server",
+    #     name="smoother_server",
+    #     output="screen",
+    #     parameters=[
+    #         os.path.join(
+    #             nhatbot_navigation_pkg,
+    #             "config",
+    #             "smoother_server.yaml"),
+    #         {"use_sim_time": use_sim_time}
+    #     ],
+    # )
 
     nav2_lifecycle_manager = Node(
         package="nav2_lifecycle_manager",
@@ -76,6 +63,5 @@ def generate_launch_description():
     return LaunchDescription([
         use_sim_time_arg,
         nav2_planner_server,
-        nav2_smoother_server,
         nav2_lifecycle_manager,
     ])

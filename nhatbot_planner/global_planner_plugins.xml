@@ -1,0 +1,17 @@
+<class_libraries>
+    <library path="dijkstra_nav2_planner">
+        <class type="nhatbot_planning::DijkstraPlanner" base_class_type="nav2_core::GlobalPlanner"></class>
+    </library>
+
+    <library path="a_star_nav2_planner">
+        <class type="nhatbot_planning::AStarPlanner" base_class_type="nav2_core::GlobalPlanner"></class>
+    </library>
+
+    <library path="dijkstra_nav2_smoother">
+        <class type="nhatbot_planning::DijkstraPlanner_Smoother" base_class_type="nav2_core::GlobalPlanner"></class>
+    </library>
+
+    <library path="a_star_nav2_smoother">
+        <class type="nhatbot_planning::AStarPlanner_Smoother" base_class_type="nav2_core::GlobalPlanner"></class>
+    </library>
+</class_libraries>
