@@ -40,7 +40,9 @@ class Zlac_Interfaces(Node):
         if self.bldcMotor and self.bldcMotor.is_connected():
 
             self.wheel_JointState_pub_ = self.create_publisher(JointState, self.param.joint_state_topic, qos_wheel_jointState)
+
             self.zlac_status_pub_ = self.create_publisher(ZlacStatus, self.param.zlac_status_topic, qos)
+            
             self.wheelVelocities_sub_ = self.create_subscription(Float64MultiArray, self.param.wheel_rotation_topic,  
                                                                  self.sub_Vel_Callback, qos_cmd , callback_group=self.ReentGroup)
             self.timer_JointState_ = self.create_timer(self.param.joint_state_frequency, self.pub_JointState_Callback, callback_group=self.ReentGroup)
@@ -83,11 +85,11 @@ class Zlac_Interfaces(Node):
 
     def pub_JointState_Callback(self):
         """Publish JointState message containing wheel positions and velocities"""
-
         if not self.bldcMotor or not self.bldcMotor.is_connected():
             return  
         if not rclpy.ok():
             return 
+
         try:
             msg_wheel_JointState_ = JointState()                   
             msg_wheel_JointState_.velocity = list(self.bldcMotor.get_angular_velocity())  # rad/s
@@ -97,14 +99,14 @@ class Zlac_Interfaces(Node):
 
         except Exception as e:
             self.get_logger().error(f"❌ Failed to publish JointState: {str(e)}")
-        if hasattr(self, 'timer_JointState_'):
-            self.timer_JointState_.cancel()
+
 
     def sub_Vel_Callback(self, msg):
         """Receive wheel speed commands and send RPM commands to motor"""
 
         if len(msg.data) != 2:
             return
+        
         # Reconnect logic if motor is disconnected
         if not self.bldcMotor or not self.bldcMotor.is_connected():
             if self.bldcMotor.was_connected:  
@@ -120,6 +122,7 @@ class Zlac_Interfaces(Node):
         # Convert RPS to RPM
         leftWheel = msg.data[0] * (60 / (2 * np.pi))
         rightWheel = msg.data[1] * (60 / (2 * np.pi))
+        
         epsilon = 1e-3
         if abs(msg.data[0]) < epsilon and abs(msg.data[1]) < epsilon:
             self.get_logger().info("🛑 Received zero velocities. Stopping motor.")
