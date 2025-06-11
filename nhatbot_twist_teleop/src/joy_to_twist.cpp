@@ -9,8 +9,8 @@ public:
     JoyToTwistNode() : Node("joy_to_twist")
     {
 
-        this->declare_parameter("linear_scale", 0.5);
-        this->declare_parameter("angular_scale", 0.5);
+        this->declare_parameter("linear_scale", 0.3);
+        this->declare_parameter("angular_scale", 0.3);
         this->declare_parameter("deadman_button", 9);
         this->declare_parameter("deadzone_threshold", 0.01);
 
@@ -30,50 +30,77 @@ public:
 private:
     void joy_callback(const sensor_msgs::msg::Joy::SharedPtr joy_msg)
     {
+
+        if (joy_msg->axes.size() <= 2 || joy_msg->buttons.size() <= deadman_button_) 
+        {
+            RCLCPP_WARN(this->get_logger(), "❗️Joy message does not have expected number of axes or buttons");
+            return;
+        }
+
+
         geometry_msgs::msg::TwistStamped twist_stamped;
         twist_stamped.header.stamp = get_clock()->now();
         twist_stamped.header.frame_id = "base_link";
 
-        // 🚀 Nếu không giữ nút deadman, dừng robot
-        if (joy_msg->buttons[deadman_button_] == 0)
-        {
-            twist_stamped.twist.linear.x = 0.0;
-            twist_stamped.twist.angular.z = 0.0;
 
-            if (!is_zero_twist(last_twist_stamped_))
-            {
-                twist_publisher_->publish(twist_stamped);
-                last_twist_stamped_ = twist_stamped;
-            }
+        bool deadman_pressed = (joy_msg->buttons[deadman_button_] != 0);
 
-            return;
-        }
-        else
-        {
+    if (!deadman_pressed)
+    {
+        twist_stamped.twist.linear.x = 0.0;
+        twist_stamped.twist.angular.z = 0.0;
 
-            double linear_value = joy_msg->axes[1];  // Trục di chuyển tiến/lùi
-            double angular_value = joy_msg->axes[2]; // Trục quay trái/phải
-
-            // 🚫 Bỏ trôi nhẹ bằng deadzone
-            if (std::abs(linear_value) < deadzone_threshold_)
-            {
-                linear_value = 0.0;
-            }
-            if (std::abs(angular_value) < deadzone_threshold_)
-            {
-                angular_value = 0.0;
-            }
-
-            twist_stamped.twist.linear.x = linear_value * linear_scale_;
-            twist_stamped.twist.angular.z = angular_value * angular_scale_;
-        }
-
-        if (first_publish_ || twist_changed(twist_stamped, last_twist_stamped_))
+        if (!is_zero_twist(last_twist_stamped_))  // ✅ Chỉ publish nếu lần trước chưa là 0
         {
             twist_publisher_->publish(twist_stamped);
             last_twist_stamped_ = twist_stamped;
-            first_publish_ = false;
+            RCLCPP_INFO(this->get_logger(), "🛑 Deadman released → Stop robot");
         }
+
+        return;
+    }
+
+        double linear_value = joy_msg->axes[1];  // Trục di chuyển tiến/lùi
+        double angular_value = joy_msg->axes[2]; // Trục quay trái/phải
+
+        // 🚫 Bỏ trôi nhẹ bằng deadzone
+        if (std::abs(linear_value) < deadzone_threshold_)  linear_value = 0.0;
+        
+        if (std::abs(angular_value) < deadzone_threshold_) angular_value = 0.0;
+        
+
+        twist_stamped.twist.linear.x = linear_value * linear_scale_;
+        twist_stamped.twist.angular.z = angular_value * angular_scale_;
+
+
+
+    // ✅ Nếu đang điều khiển (≠ 0) thì LUÔN publish
+
+    if (!is_zero_twist(twist_stamped))
+    {
+        twist_publisher_->publish(twist_stamped);
+        last_twist_stamped_ = twist_stamped;
+        first_publish_ = false;
+        return;
+    }
+
+
+    // ✅ Nếu twist == 0, thì CHỈ publish 1 lần (khi từ trạng thái ≠ 0 trở về 0)
+
+
+    if (!is_zero_twist(last_twist_stamped_))
+    {
+        twist_publisher_->publish(twist_stamped);
+        last_twist_stamped_ = twist_stamped;
+        RCLCPP_INFO(this->get_logger(), "🛑 Joystick returned to 0 → Stop robot");
+    }
+
+        // if (first_publish_ || twist_changed(twist_stamped, last_twist_stamped_))
+        // {
+        //     twist_publisher_->publish(twist_stamped);
+        //     last_twist_stamped_ = twist_stamped;
+        //     first_publish_ = false;
+        // }
     }
 
     bool twist_changed(const geometry_msgs::msg::TwistStamped &a, const geometry_msgs::msg::TwistStamped &b)
