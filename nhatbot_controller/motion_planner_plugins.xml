@@ -1,0 +1,13 @@
+<class_libraries>
+	<library path="nav2_pd_motion_planner">
+		<class type="nhatbot_controller::PDMotionPlanner" base_class_type="nav2_core::Controller">
+		  <description>PD Motion Planner.</description>
+		</class>
+	</library>
+	
+	<library path="nav2_pure_pursuit_motion_planner">
+		<class type="nhatbot_controller::PurePursuit" base_class_type="nav2_core::Controller">
+		  <description>Pure Pursuit Motion Planner.</description>
+		</class>
+	</library>
+</class_libraries>
