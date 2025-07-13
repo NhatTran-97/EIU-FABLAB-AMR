@@ -13,6 +13,7 @@ find_package(rosidl_default_generators REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/ZlacStatus.msg"
   "msg/EulerDegrees.msg"
+  "msg/LaneSteering.msg"
 
   DEPENDENCIES std_msgs
 )
