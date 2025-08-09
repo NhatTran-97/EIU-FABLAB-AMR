@@ -2,6 +2,6 @@
 	path = nhatbot_drivers/rplidar_ros
 	url = https://github.com/Slamtec/rplidar_ros.git 
  	branch = ros2
-[submodule "src/nhatbot_drivers/bno055"]
-	path = src/nhatbot_drivers/bno055
+[submodule "nhatbot_drivers/bno055"]
+	path = nhatbot_drivers/bno055
 	url = https://github.com/flynneva/bno055.git
