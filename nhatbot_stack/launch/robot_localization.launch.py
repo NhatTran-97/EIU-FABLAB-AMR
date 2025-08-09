@@ -35,6 +35,7 @@ def generate_launch_description():
         executable='amcl',
         name='amcl',
         output='screen',
+        emulate_tty=True,
         parameters=[LaunchConfiguration('amcl_config')]
     )
 

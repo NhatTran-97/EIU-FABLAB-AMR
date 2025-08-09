@@ -1,0 +1,25 @@
+usb_cam:
+  ros__parameters:
+    video_device: "/dev/video0"
+    framerate: 30.0
+    image_width: 640
+    image_height: 480
+    pixel_format: "mjpeg2rgb" # Hỗ trợ tốt với độ phân giải cao  yuyv
+    io_method: "mmap"
+    frame_id: "camera"
+    camera_name: "logitech_c930e"
+
+    autoexposure: true # bạn có thể tắt nếu muốn tự chỉnh exposure
+    exposure: 333 # sẽ chỉ có tác dụng khi autoexposure=false
+    autofocus: false
+    focus: 0 # focus_auto=0 nên set cố định
+    auto_white_balance: true
+    white_balance: 4000 # bị inactive nếu auto_white_balance=true
+    gain: 220 # giá trị đang có
+    brightness: 100
+    contrast: 128
+    saturation: 128
+    sharpness: 128
+
+    # Tắt các dòng chưa cần hoặc hay gây lỗi
+    # camera_info_url: ""
