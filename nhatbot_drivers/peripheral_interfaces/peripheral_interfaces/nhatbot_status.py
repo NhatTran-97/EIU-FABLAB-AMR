@@ -4,13 +4,15 @@ from rclpy.node import Node
 from dataclasses import dataclass
 import Jetson.GPIO as GPIO
 import time
+import sounddevice as sd
+import soundfile as sf
 
 @dataclass(frozen=True)
 class Pins:
     robot_ready: int = 23
-    robot_warning: int = 15
+    robot_warning: int = 18
     robot_error: int = 35
-    status_buzzer: int = 13  # ⚠️ Nếu dùng PWM thì nên đổi sang Pin 32
+    status_buzzer: int = 13  
     full_motor_battery: int = 31
     mid_motor_battery: int = 12
     low_motor_battery: int = 29
@@ -23,11 +25,13 @@ class NhatbotStatus(Node):
         super().__init__('nhatbot_status')
 
         self.pins = Pins()
-        self.led_state = False     # ✅ Trạng thái LED
-        self.blink = False         # ✅ Trạng thái chớp tắt LED
+        self.led_state = False     
+        self.blink = False         
 
         self.setup_gpio()
         self.timer = self.create_timer(0.1, self.timer_callback)  # Nhấp nháy 10Hz
+
+        GPIO.setup(self.pins.robot_warning, GPIO.OUT)
 
     def setup_gpio(self):
         GPIO.setmode(GPIO.BOARD)
@@ -35,7 +39,7 @@ class NhatbotStatus(Node):
             GPIO.setup(pin, GPIO.OUT)
             GPIO.output(pin, GPIO.LOW)  # Khởi tạo tất cả pin ở trạng thái LOW
 
-        self.active_robot_ready(True)  # Bật LED khi khởi động
+        # self.active_robot_ready(True)  # Bật LED khi khởi động
 
     def active_robot_ready(self, on: bool):
         if self.led_state != on:
@@ -60,6 +64,7 @@ class NhatbotStatus(Node):
             time.sleep(on_time)
             GPIO.output(self.pins.status_buzzer, GPIO.LOW)
             time.sleep(off_time)
+    
 
 def main(args=None):
     rclpy.init(args=args)

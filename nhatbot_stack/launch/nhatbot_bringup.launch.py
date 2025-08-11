@@ -114,6 +114,12 @@ def generate_launch_description():
             emulate_tty=True,
             parameters=[{"wheel_radius":wheel_radius, "wheel_separation": wheel_separation, "enable_tf_broadcast:": True}])
 
+
+    audio_server = Node(
+        package="peripheral_interfaces",
+        executable="audio_server.py",
+        name="voice_player_server",
+        output="screen")
     # Include rosbridge server launch
     rosbridge_launch = IncludeLaunchDescription(
         AnyLaunchDescriptionSource(
@@ -201,7 +207,8 @@ def generate_launch_description():
         a_star_node,
         usb_cam,
         bno055_launch,
-        micro_ros, 
+        # micro_ros, 
+        audio_server
         # rviz_node,
         # static_pub
         # reset_odom_service
