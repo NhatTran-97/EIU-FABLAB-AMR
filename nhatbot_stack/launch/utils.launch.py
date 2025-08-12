@@ -24,9 +24,17 @@ def generate_launch_description():
         name='voice_player_server',
         output='screen',)
 
+
+    nhatbot_status_node = Node(
+        package='peripheral_interfaces',
+        executable='nhatbot_status.py',
+        name='nhatbot_status',
+        output='screen',)
+
     return LaunchDescription([
             safety_stop_node,
-            audio_server_node
+            audio_server_node,
+            nhatbot_status_node
     ])
 
 
