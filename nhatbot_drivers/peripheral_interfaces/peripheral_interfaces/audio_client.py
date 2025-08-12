@@ -4,13 +4,13 @@ from rclpy.node import Node
 from nhatbot_msgs.srv import PlayAudio
 from ament_index_python.packages import get_package_share_directory
 from pathlib import Path
-import os
+
 
 class AudioClient(Node):
     def __init__(self):
         super().__init__('play_audio_client')
 
-        self.declare_parameter('voice_files', ['xin_chao_anh_danh', 'xin_chao_hieu_truong', 'em_chao_dai_ca_nhat'])
+        self.declare_parameter('voice_files', ['xin_chao_anh_danh', 'xin_chao_hieu_truong', 'em_chao_dai_ca_nhat', 'vat_can'])
         voice_list = self.get_parameter('voice_files').get_parameter_value().string_array_value
 
         voices_path = Path(get_package_share_directory('peripheral_interfaces')) / 'voices'
@@ -32,7 +32,7 @@ class AudioClient(Node):
             self.get_logger().info("Service not available, waiting again...")
 
         req = PlayAudio.Request()
-        req.path = str(files_dict[voice_list[2]])
+        req.path = str(files_dict[voice_list[3]])
 
         future = audio_client.call_async(req)
         future.add_done_callback(self.responseCallback)

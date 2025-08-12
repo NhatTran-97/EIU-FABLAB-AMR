@@ -115,11 +115,7 @@ def generate_launch_description():
             parameters=[{"wheel_radius":wheel_radius, "wheel_separation": wheel_separation, "enable_tf_broadcast:": True}])
 
 
-    audio_server = Node(
-        package="peripheral_interfaces",
-        executable="audio_server.py",
-        name="voice_player_server",
-        output="screen")
+    
     # Include rosbridge server launch
     rosbridge_launch = IncludeLaunchDescription(
         AnyLaunchDescriptionSource(
@@ -144,14 +140,13 @@ def generate_launch_description():
         output="screen")
 
 
-    lidar_node = IncludeLaunchDescription(
-                                            os.path.join(get_package_share_directory("nhatbot_stack"),"launch", "lidar_a1_filter.launch.py"),)
-    a_star_node = IncludeLaunchDescription(
-                                            os.path.join(get_package_share_directory("nhatbot_planner"),"launch", "nhatbot_planner.launch.py"),)
+    lidar_node = IncludeLaunchDescription(os.path.join(get_package_share_directory("nhatbot_stack"),"launch", "lidar_a1_filter.launch.py"),)
+    a_star_node = IncludeLaunchDescription(os.path.join(get_package_share_directory("nhatbot_planner"),"launch", "nhatbot_planner.launch.py"),)
     
-    localization_node = IncludeLaunchDescription(
-                                                os.path.join(get_package_share_directory("nhatbot_stack"),"launch", "robot_localization.launch.py"),
-                                                condition=IfCondition(use_localization))
+    localization_node = IncludeLaunchDescription(os.path.join(get_package_share_directory("nhatbot_stack"),"launch", "robot_localization.launch.py"),condition=IfCondition(use_localization))
+
+    utils_nodes = IncludeLaunchDescription(os.path.join(nhatbot_stack_pkg,"launch", "utils.launch.py"),)
+
     
     usb_cam = Node(
             package='usb_cam',
@@ -165,7 +160,7 @@ def generate_launch_description():
                     executable='micro_ros_agent',
                     name='micro_ros_serial_agent',
                     output='screen',
-                    arguments=['serial', '--dev', '/dev/ttyTHS1 ',  '-b', '115200'])   # /dev/ttyTHS1   /dev/ttyUSB0
+                    arguments=['serial', '--dev', '/dev/esp_device',  '-b', '115200']) 
                                             
 
     static_pub =  Node(
@@ -206,9 +201,10 @@ def generate_launch_description():
         localization_node,
         a_star_node,
         usb_cam,
-        bno055_launch,
+        utils_nodes
+       # bno055_launch,
         # micro_ros, 
-        audio_server
+
         # rviz_node,
         # static_pub
         # reset_odom_service

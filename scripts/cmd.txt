@@ -7,12 +7,16 @@ sudo chmod -R 777 /home
 
 - access running container/ open additional terminal
 sudo docker exec -it nhatbot_container bash  
+
 - reopen used container (in case --rm is not used)
 sudo docker start -ai nhatbot_container   
+
 - Stop the container when it is no longer in use
 sudo docker stop nhatbot_container
-- Xoa container khi khong dung nua 
-sudo docker rm nhatbot_container: 
+
+- Delete container when do not use
+sudo docker rm nhatbot_container
+
 - Keep the container in background mode 
     -d 
 
@@ -32,4 +36,15 @@ chmod -R 777 /home/nhat/.ros
 sudo chown -R nhat:nhat /home/nhat
 mkdir -p /home/nhat/.ros
 sudo chown -R nhat:nhat /home/nhat/.ros
+
+
+sudo udevadm control --reload-rules
+sudo udevadm trigger
+                                                                                                         /etc/udev/rules.d/90-nhatbot.rules                                                                                                                         
+
+KERNEL=="ttyUSB*", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", ATTRS{serial}=="0001", MODE:="0777", SYMLINK+="rplidar", GROUP="plugdev"
+KERNEL=="ttyUSB*", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", ATTRS{serial}=="AB0PJ5HV", MODE:="0777", SYMLINK+="zlac_8015d", GROUP="plugdev"
+KERNEL=="ttyUSB*", KERNELS=="1-2.4", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", MODE:="0777", SYMLINK+="esp_device", GROUP="dialout"
+
+KERNEL=="ttyACM*", ATTRS{idVendor}=="2341", ATTRS{idProduct}=="0042", ATTRS{serial}=="55739323837351017271", MODE:="0777", SYMLINK+="arduino_mega", GROUP="dialout"
 

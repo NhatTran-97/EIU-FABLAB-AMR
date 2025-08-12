@@ -12,8 +12,11 @@ find_package(rclpy REQUIRED)
 
 
 install(PROGRAMS
+
+  ${PROJECT_NAME}/nhatbot_status.py
   ${PROJECT_NAME}/audio_server.py
   ${PROJECT_NAME}/audio_client.py
+  ${PROJECT_NAME}/__init__.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

@@ -1,19 +1,18 @@
 FROM arm64v8/ros:humble
-# FROM nhatbot:latest
+
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 WORKDIR /home 
-# SHELL ["/bin/bash", "-c"]
 
-# Cài đặt curl, gnupg2 và lsb-release
-RUN apt-get update && apt-get install -y curl 
 
-# Cập nhật và cài đặt các gói cần thiết
 RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
+    bluez \
     nano \
+    espeak alsa-utils pulseaudio sox libasound2-plugins mpg123 ffmpeg \
+    i2c-tools python3-smbus libi2c-dev \
     gedit \
     net-tools \
     usbutils \
@@ -23,6 +22,7 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     wget \
+    can-utils libsocketcan2 libsocketcan-dev python3-can \
     build-essential \
     libcanberra-gtk-module \
     libcanberra-gtk3-module \
@@ -30,6 +30,8 @@ RUN apt-get update && apt-get install -y \
     libsm6 libxext6 libxrender-dev \
     dbus-x11 \
     libmodbus-dev \
+    libopencv-dev \
+    ros-humble-can-msgs \
     ros-humble-rviz2 \
     ros-humble-tf-transformations \
     ros-humble-joy \
@@ -43,7 +45,9 @@ RUN apt-get update && apt-get install -y \
     ros-humble-nav2-bringup \
     ros-humble-nav2-controller \
     ros-humble-nav2-planner \
+    ros-humble-example-interfaces \ 
     ros-humble-nav2-amcl \
+    ros-humble-usb-cam \
     ros-humble-nav2-map-server \
     ros-humble-nav2-lifecycle-manager \
     ros-humble-nav2-simple-commander \
@@ -52,14 +56,19 @@ RUN apt-get update && apt-get install -y \
     ros-humble-ros2-control && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Cài đặt các thư viện Python cần thiết
 RUN python3 -m pip install --upgrade pip && \
     pip3 install --no-cache-dir --break-system-packages \
     opencv-python \
     pymodbus==2.3.0 \
     asyncio \
     pyserial \
+    pydub \
+    sounddevice \
+    soundfile \
+    smbus2 \
+    Jetson.GPIO \
     transforms3d \
+    cantools \
     websocket-client
 
 RUN echo "source /opt/ros/humble/setup.bash" >> /root/.bashrc
@@ -67,5 +76,4 @@ RUN echo "source /home/nhatbot_ws/install/setup.bash" >> /root/.bashrc
 
 
 
-# Mở terminal bash khi container chạy
 CMD ["/bin/bash"]
