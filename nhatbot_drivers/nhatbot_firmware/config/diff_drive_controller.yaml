@@ -1,0 +1,45 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 100  # Hz - tần số vòng lặp controller_manager
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+      publish_rate: 50.0   # Hz - tần số publish joint_states
+
+    diff_drive_controller:
+      type: diff_drive_controller/DiffDriveController
+
+diff_drive_controller:
+  ros__parameters:
+
+    left_wheel_names: ["wheel_left_joint"]
+    right_wheel_names: ["wheel_right_joint"]
+
+    # Các interface mà hardware_interface của bạn export ra
+    command_interfaces: ["velocity"]
+    state_interfaces: ["position", "velocity"]
+
+    # Các tham số vật lý (sửa theo robot thực tế)
+    wheel_separation: 0.116    # (m) khoảng cách 2 bánh
+    wheel_radius: 0.017        # (m) bán kính bánh xe
+
+    # Cấu hình odometry
+    odom_frame_id: "odom"
+    base_frame_id: "base_link"
+    publish_rate: 50.0          # Hz - tần số publish odom
+    enable_odom_tf: true      # có xuất TF odom -> base_link
+
+    # Giới hạn vận tốc (nên đặt để tránh command quá lớn)
+    linear:
+      x:
+        has_velocity_limits: true
+        max_velocity: 1.0     # m/s
+        min_velocity: -1.0
+    angular:
+      z:
+        has_velocity_limits: true
+        max_velocity: 1.0     # rad/s
+        min_velocity: -1.0
+
+    # Nếu muốn dùng TwistStamped thay vì Twist thường
+    use_stamped_vel: true

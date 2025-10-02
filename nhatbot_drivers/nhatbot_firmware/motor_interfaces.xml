@@ -1,0 +1,11 @@
+<library path="nhatbot_firmware">
+    <class name="nhatbot_interface/NhatbotInterface"
+           type="nhatbot_interface::NhatbotInterface"
+           base_class_type="hardware_interface::SystemInterface">
+           <description>
+            Motor Hardware Interface
+           </description>
+
+    </class>
+
+</library>
