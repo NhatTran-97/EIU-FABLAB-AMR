@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="mobile_robot">
+
+    <ros2_control name="RobotSystem" type="system">
+        <hardware>
+            <plugin>nhatbot_interface/NhatbotInterface</plugin>
+            <param name="port">/dev/ttyUSB1</param>
+            <param name="baudrate">115200</param>
+            <param name="slave_id">1</param>
+        </hardware>
+
+        
+        <!-- ros2_control Common Interfaces -->
+        <joint name="wheel_right_joint">
+            <command_interface name="velocity">
+            <!-- <param name="min">-1</param>
+            <param name="max">1</param> -->
+            </command_interface>
+            <state_interface name="position" />
+            <state_interface name="velocity" />
+        </joint>
+
+        <joint name="wheel_left_joint">
+            <command_interface name="velocity">
+            <!-- <param name="min">-1</param>
+            <param name="max">1</param> -->
+            </command_interface>
+            <state_interface name="position" />
+            <state_interface name="velocity" />
+        </joint>
+    </ros2_control>
+
+
+</robot>

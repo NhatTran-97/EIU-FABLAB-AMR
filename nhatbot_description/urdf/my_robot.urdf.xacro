@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<robot name="my_robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:include filename="hardware_interface.ros2_control.xacro" />
+</robot>
