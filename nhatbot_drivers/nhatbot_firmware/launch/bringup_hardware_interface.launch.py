@@ -15,10 +15,7 @@ def generate_launch_description():
     controllers_file = os.path.join(firmware_pkg_share, 'config', 'diff_drive_controller.yaml')
     # robot_description = ParameterValue(Command(['xacro', urdf_path]),value_type=str)
 
-    robot_description = ParameterValue(
-    Command(['xacro ' + urdf_path]),
-    value_type=str
-)
+    robot_description = ParameterValue(Command(['xacro ' + urdf_path]),value_type=str)
 
     control_node = Node(
         package="controller_manager",
@@ -48,9 +45,18 @@ def generate_launch_description():
         output='screen'
     )
 
+    sensor_broadcaster_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=['SensorBroadcaster', '--controller-manager', '/controller_manager'],
+        output="screen"
+    )
+
     return LaunchDescription([
         # robot_state_publisher_node,
         control_node,
         joint_state_broadcaster_spawner,
-        diff_drive_controller_spawner
+        diff_drive_controller_spawner,
+        sensor_broadcaster_spawner
+        
     ])

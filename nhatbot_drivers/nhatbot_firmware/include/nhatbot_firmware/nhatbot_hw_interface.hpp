@@ -41,7 +41,7 @@ namespace nhatbot_interface
             std::vector<double> velocity_commands_;
             std::vector<double> position_states_;
             std::vector<double> velocity_states_;
-            zlac_modbus::ZLAC8015D_SDK zlac_driver;
+        //    zlac_modbus::ZLAC8015D_SDK zlac_driver;
 
             
 

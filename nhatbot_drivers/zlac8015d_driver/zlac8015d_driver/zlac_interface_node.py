@@ -14,12 +14,13 @@ from rclpy.qos import QoSProfile, QoSReliabilityPolicy, QoSHistoryPolicy, QoSDur
 import os 
 from nhatbot_msgs.msg import ZlacStatus
 from node_parameters import NodeParameters
-
+import time
 
 # Main motor interface node
-class Zlac_Interfaces(Node):
+class ZlacInterfaces(Node):
     def __init__(self, ):
         super().__init__('zlac_driver_node')
+        self._shutting_down = False
 
         self.param = NodeParameters(self)
 
@@ -42,13 +43,12 @@ class Zlac_Interfaces(Node):
             self.wheel_JointState_pub_ = self.create_publisher(JointState, self.param.joint_state_topic, qos_wheel_jointState)
 
             self.zlac_status_pub_ = self.create_publisher(ZlacStatus, self.param.zlac_status_topic, qos)
-            
             self.wheelVelocities_sub_ = self.create_subscription(Float64MultiArray, self.param.wheel_rotation_topic,  
-                                                                 self.sub_Vel_Callback, qos_cmd , callback_group=self.ReentGroup)
-            self.timer_JointState_ = self.create_timer(self.param.joint_state_frequency, self.pub_JointState_Callback, callback_group=self.ReentGroup)
-            self.timer_zlacStatus_ = self.create_timer(self.param.zlac_status_frequency, self.zlacStatus_Callback, callback_group=self.ReentGroup)
-            self.motor_srv_ = self.create_service(Trigger, self.param.reset_encoder_service, self.ResetPos_Callback)
-            
+                                                                 self.sub_vel_callback, qos_cmd , callback_group=self.ReentGroup)
+            self.timer_JointState_ = self.create_timer(self.param.joint_state_frequency, self.pub_jointstate_callback, callback_group=self.ReentGroup)
+            self.timer_zlacStatus_ = self.create_timer(self.param.zlac_status_frequency, self.zlac_status_callback, callback_group=self.ReentGroup)
+            self.motor_srv_ = self.create_service(Trigger, self.param.reset_encoder_service, self.reset_pos_callback)
+        
     def init_system(self,):
         """Initialize the ZLAC8015D motor interface and configure default parameters"""
         try:
@@ -67,46 +67,69 @@ class Zlac_Interfaces(Node):
             self.get_logger().error(f"❌ Error during motor initialization: {str(e)}")
             self.bldcMotor = None  
 
-    def zlacStatus_Callback(self):
+
+    def zlac_status_callback(self):
         """
         Periodically publishes the current ZLAC8015D motor status as a ZlacStatus message.
         Includes battery voltage and (optionally) other motor diagnostics.
         """
+        if self._shutting_down or not rclpy.ok():
+            return
+        try:
+   
+            zlac_status = ZlacStatus()
+            zlac_status.battery_voltage = float(self.bldcMotor.get_battery_voltage())
+            zlac_status.brake_state = str(self.bldcMotor.get_brake_state())
+            zlac_status.control_mode = int(self.bldcMotor.get_mode())
+            zlac_status.driver_temp = float(self.bldcMotor.get_driver_temperature())
+            zlac_status.vehicle_state = str(self.motor_states)
+            try:
+                self.zlac_status_pub_.publish(zlac_status)
+            except Exception as e:
+                if not self._shutting_down and rclpy.ok():
+                    self.get_logger().error(f"❌ Failed to publish ZlacStatus: {e}")
+        except Exception as e:
+            if not self._shutting_down and rclpy.ok():
+                self.get_logger().error(f"❌ ZlacStatus error: {e}")
 
-        zlac_status = ZlacStatus()
-        # motor_temperature = self.bldcMotor.get_motor_temperature()
-        zlac_status.battery_voltage = float(self.bldcMotor.get_battery_voltage())
-        zlac_status.brake_state = str(self.bldcMotor.get_brake_state())
-        zlac_status.control_mode = int(self.bldcMotor.get_mode())
-        zlac_status.driver_temp = float(self.bldcMotor.get_driver_temperature())
-        zlac_status.vehicle_state = str(self.motor_states)
 
-        self.zlac_status_pub_.publish(zlac_status)
-
-    def pub_JointState_Callback(self):
-        """Publish JointState message containing wheel positions and velocities"""
+    def pub_jointstate_callback(self):
+        if self._shutting_down or not rclpy.ok():
+            return
         if not self.bldcMotor or not self.bldcMotor.is_connected():
-            return  
-        if not rclpy.ok():
-            return 
+            return
 
         try:
-            msg_wheel_JointState_ = JointState()                   
-            msg_wheel_JointState_.velocity = list(self.bldcMotor.get_angular_velocity())  # rad/s
-            msg_wheel_JointState_.position = list(self.bldcMotor.get_wheels_travelled())  # rad
-            msg_wheel_JointState_.header.stamp = self.get_clock().now().to_msg()
-            self.wheel_JointState_pub_.publish(msg_wheel_JointState_)
+            vel = self.bldcMotor.get_angular_velocity()    
+            pos = self.bldcMotor.get_wheels_travelled()    
 
+            if (not isinstance(vel, (list, tuple)) or not isinstance(pos, (list, tuple)) or len(vel) != 2 or len(pos) != 2 or any(v is None for v in vel) or any(p is None for p in pos)):
+                if not self._shutting_down and rclpy.ok():
+                    print("⚠ JointState skipped (invalid data).")
+                return
+
+            msg = JointState()
+            msg.header.stamp = self.get_clock().now().to_msg()
+            msg.velocity = [float(vel[0]), float(vel[1])]
+            msg.position = [float(pos[0]), float(pos[1])]
+
+            try:
+                self.wheel_JointState_pub_.publish(msg)
+            except Exception as e:
+                
+                if not self._shutting_down and rclpy.ok():
+                    self.get_logger().error(f"❌ Failed to publish JointState: {e}")
         except Exception as e:
-            self.get_logger().error(f"❌ Failed to publish JointState: {str(e)}")
+            if not self._shutting_down and rclpy.ok():
+                self.get_logger().error(f"❌ Failed to publish JointState: {e}")
 
-
-    def sub_Vel_Callback(self, msg):
+    def sub_vel_callback(self, msg):
         """Receive wheel speed commands and send RPM commands to motor"""
 
+        if self._shutting_down or not rclpy.ok():
+            return
         if len(msg.data) != 2:
             return
-        
         # Reconnect logic if motor is disconnected
         if not self.bldcMotor or not self.bldcMotor.is_connected():
             if self.bldcMotor.was_connected:  
@@ -141,6 +164,7 @@ class Zlac_Interfaces(Node):
             self.motor_states = "ACTIVATE"
         except Exception as e:
             self.get_logger().error(f"❌ Error while setting RPM: {str(e)}")
+
     def exitBLDCMotor(self):
         """Stop the motor safely when ROS shuts down"""
         if self.bldcMotor:
@@ -152,7 +176,7 @@ class Zlac_Interfaces(Node):
             except Exception as e:
                print(f"❌ Failed to stop motor: {str(e)}")
 
-    def ResetPos_Callback(self, request, response):
+    def reset_pos_callback(self, request, response):
         """Reset the wheel encoder feedback position"""
 
         if not self.bldcMotor or not self.bldcMotor.is_connected():
@@ -173,9 +197,41 @@ class Zlac_Interfaces(Node):
         return response
 
 
+    def prepare_shutdown(self):
+        self._shutting_down = True
+
+        if hasattr(self, 'timer_JointState_') and self.timer_JointState_:
+            try:
+                self.timer_JointState_.cancel()
+                self.destroy_timer(self.timer_JointState_)
+            except Exception:
+                pass
+            self.timer_JointState_ = None
+
+        if hasattr(self, 'timer_zlacStatus_') and self.timer_zlacStatus_:
+            try:
+                self.timer_zlacStatus_.cancel()
+                self.destroy_timer(self.timer_zlacStatus_)
+            except Exception:
+                pass
+            self.timer_zlacStatus_ = None
+        time.sleep(0.05)
+        self.exitBLDCMotor()
+
+        if hasattr(self, 'wheel_JointState_pub_') and self.wheel_JointState_pub_:
+            try: self.destroy_publisher(self.wheel_JointState_pub_)
+            except Exception: pass
+            self.wheel_JointState_pub_ = None
+
+        if hasattr(self, 'zlac_status_pub_') and self.zlac_status_pub_:
+            try: self.destroy_publisher(self.zlac_status_pub_)
+            except Exception: pass
+            self.zlac_status_pub_ = None
+
+
 def main():
     rclpy.init()
-    node = Zlac_Interfaces()
+    node = ZlacInterfaces()
     executor = MultiThreadedExecutor(num_threads=os.cpu_count()) 
     executor.add_node(node)
     try:
@@ -183,9 +239,9 @@ def main():
     except KeyboardInterrupt:
         print("🛑 Ctrl+C detected! Shutting down Zlac_Interfaces node ...")
     finally:
-        node.exitBLDCMotor()
-        node.destroy_node()
+        node.prepare_shutdown()        
         executor.shutdown()
+        node.destroy_node()
         if rclpy.ok():
             rclpy.shutdown()
         print("✅ Zlac_Interfaces node shutdown complete")

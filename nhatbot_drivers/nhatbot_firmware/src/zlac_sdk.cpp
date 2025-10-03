@@ -235,20 +235,24 @@ bool ZLAC8015D_SDK::setMode(ControlMode mode)
 
 bool ZLAC8015D_SDK::setRPM(int left_rpm, int right_rpm)
 {
-    std::cout << "⚙️ Set RPM -> Left: " << left_rpm << ", Right: " << right_rpm << std::endl;
-
     // Giới hạn RPM
     int16_t left  = std::clamp(left_rpm,  -max_rpm_, max_rpm_);
     int16_t right = std::clamp(right_rpm, -max_rpm_, max_rpm_);
 
-    // Ghi vào thanh ghi RPM (2’s complement 16-bit signed)
-    std::vector<uint16_t> values = {
-        static_cast<uint16_t>(left),
-        static_cast<uint16_t>(right)
-    };
+    // Đảo bên (swap)
+    int16_t tmp = left;
+    left  = right;
+    right = tmp;
 
-    return writeRegisters(zlac::L_CMD_RPM, values); // 0x2088, 0x2089
+
+    left = -left;
+
+
+    std::vector<uint16_t> values = {static_cast<uint16_t>(left),  static_cast<uint16_t>(right)};
+
+    return writeRegisters(zlac::L_CMD_RPM, values);
 }
+
 
 int32_t ZLAC8015D_SDK::join_u16_to_s32(uint16_t hi, uint16_t lo)
 {
@@ -288,91 +292,129 @@ std::vector<uint16_t> ZLAC8015D_SDK::modbus_fail_read_handler(uint16_t addr, int
     return {};  // Trả về vector rỗng nếu thất bại sau max_retries lần thử
 }
 
+// std::pair<float, float> ZLAC8015D_SDK::get_wheels_travelled()
+// {
+//     /*
+//     distance = (pulses / CPR) * 2*Pi*R
+//     */
+    
+//     std::vector<uint16_t> regs = modbus_fail_read_handler(zlac::L_FB_POS_HI, 4);
+//     if (regs.empty() || regs.size() < 4)
+//     {
+//         std::cerr << "Error reading wheel position data from Modbus" << std::endl; 
+//         return{std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::quiet_NaN()};
+//     }
+//     try
+//     {
+//         int32_t l_pulse = join_u16_to_s32(regs[0], regs[1]);
+//         int32_t r_pulse = join_u16_to_s32(regs[2], regs[3]);
+
+//         float l_traveled = (float(l_pulse) / float(cpr_)) * float(travel_in_one_rev_) / float(R_Wheel_);
+//         float r_traveled = (float(r_pulse) / float(cpr_)) * float(travel_in_one_rev_) / float(R_Wheel_);
+//         return {-l_traveled, r_traveled};
+//     }
+//     catch(const std::exception& e)
+//     {
+//         std::cerr << "❌ Overflow/compute error while calculating wheel position: " << e.what() << std::endl;
+//         return {std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::quiet_NaN()};
+//     }
+// }
+
+
 std::pair<float, float> ZLAC8015D_SDK::get_wheels_travelled()
 {
-    /*
-    distance = (pulses / CPR) * 2*Pi*R
-    */
-    
     std::vector<uint16_t> regs = modbus_fail_read_handler(zlac::L_FB_POS_HI, 4);
     if (regs.empty() || regs.size() < 4)
     {
         std::cerr << "Error reading wheel position data from Modbus" << std::endl; 
-        return{std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::quiet_NaN()};
+        return {std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::quiet_NaN()};
     }
+
     try
     {
         int32_t l_pulse = join_u16_to_s32(regs[0], regs[1]);
         int32_t r_pulse = join_u16_to_s32(regs[2], regs[3]);
 
-        float l_traveled = (float(l_pulse) / float(cpr_)) * float(travel_in_one_rev_) / float(R_Wheel_);
-        float r_traveled = (float(r_pulse) / float(cpr_)) * float(travel_in_one_rev_) / float(R_Wheel_);
-        return {-l_traveled, r_traveled};
+        float l_traveled = (static_cast<float>(l_pulse) / static_cast<float>(cpr_)) * (2.0f * M_PI);  // R_Wheel_
+        float r_traveled = (static_cast<float>(r_pulse) / static_cast<float>(cpr_)) * (2.0f * M_PI );
+
+        float left  = r_traveled;
+        float right =  -l_traveled;
+
+        return {left, right};
     }
     catch(const std::exception& e)
     {
         std::cerr << "❌ Overflow/compute error while calculating wheel position: " << e.what() << std::endl;
-        return {std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::quiet_NaN()};
+        return {std::numeric_limits<float>::quiet_NaN(),
+                std::numeric_limits<float>::quiet_NaN()};
     }
-    
-
 }
 
 std::pair<float, float> ZLAC8015D_SDK::get_rpm()
 {
-    if(!isOpen())
+    if (!isOpen())
     {
         std::cerr << "Unable to get RPM speed: Modbus connection lost!" << std::endl;
         return {0.0f, 0.0f};
     }
+
     std::vector<uint16_t> regs = modbus_fail_read_handler(zlac::L_FB_RPM, 2);
-    if(regs.empty() || regs.size() < 2)
+    if (regs.empty() || regs.size() < 2)
     {
         std::cerr << "Error: unable to read RPM from the motor!" << std::endl;
         return {0.0f, 0.0f};
     }
-    try{
-        // Convert uint16_t -> int16_t
-        int16_t l_raw = static_cast<int16_t>(regs[0]);
-        int16_t r_raw = static_cast<int16_t>(regs[1]);
+
+    try {
+        int16_t r_raw = static_cast<int16_t>(regs[0]);
+        int16_t l_raw = static_cast<int16_t>(regs[1]);
 
         float fb_L_rpm = static_cast<float>(l_raw) / 10.0f;
         float fb_R_rpm = static_cast<float>(r_raw) / 10.0f;
-        return {fb_L_rpm, fb_R_rpm};
+
+        return {fb_L_rpm, -fb_R_rpm};
     }
-    catch(const std::exception& e)
+    catch (const std::exception& e)
     {
-        std::cerr << "Error processing RPM data: "<< e.what() << std::endl;
+        std::cerr << "Error processing RPM data: " << e.what() << std::endl;
         return {0.0f, 0.0f};
     }
 }
+
+
 
 std::pair<int32_t, int32_t> ZLAC8015D_SDK::get_wheels_tick()
 {
     if(!isOpen())
     {
         std::cerr << "Unable to get wheels tick: Modbus connection lost!" << std::endl;
-        return {0.0f, 0.0f};
+        return {0, 0};
     }
+
     std::vector<uint16_t> regs = modbus_fail_read_handler(zlac::L_FB_POS_HI, 4);
     if(regs.empty() || regs.size() < 4)
     {
         std::cerr << "Error reading encoder data from Modbus" << std::endl;
         return {0, 0};
     }
+
     try
     {
-        int32_t l_tick = join_u16_to_s32(regs[0], regs[1]);
-        int32_t r_tick = join_u16_to_s32(regs[2], regs[3]);
-        return {l_tick, r_tick};
+        // Đúng theo datasheet: 0-1 là Right, 2-3 là Left
+        int32_t r_tick = join_u16_to_s32(regs[0], regs[1]);
+        int32_t l_tick = join_u16_to_s32(regs[2], regs[3]);
+
+        return {l_tick, -r_tick};   // trả về theo thứ tự (Left, Right)
     }
     catch(const std::exception& e)
     {
-        std::cerr << "Overflow/compute error while reading encoder tick: " << e.what() << std::endl;
+        std::cerr << "❌ Overflow/compute error while reading encoder tick: " << e.what() << std::endl;
         return {0, 0};
     }
-    
 }
+
+
 
 float ZLAC8015D_SDK::get_battery_voltage()
 {
@@ -642,11 +684,50 @@ std::pair<float, float> ZLAC8015D_SDK::get_linear_velocities()
                 std::numeric_limits<float>::quiet_NaN()};
     }
 
-    // Lưu ý: Python code có đổi dấu bánh phải
     float vL = rpm_to_linear(rpmL);
     float vR = rpm_to_linear(-rpmR);
 
     return {vL, vR};
+}
+
+
+// std::pair<float, float> ZLAC8015D_SDK::get_wheel_angular_velocities()
+// {
+//     auto [rpmL_raw, rpmR_raw] = get_rpm();
+
+//     float rpmL = static_cast<float>(rpmL_raw);
+//     float rpmR = static_cast<float>(rpmR_raw);
+
+//     if (std::isnan(rpmL) || std::isnan(rpmR)) {
+//         std::cerr << "❌ Unable to get RPM from the motor." << std::endl;
+//         return {0.0f, 0.0f}; // an toàn
+//     }
+
+//     constexpr float RPM_TO_RAD_S = 2.0f * static_cast<float>(M_PI) / 60.0f;
+
+//     float wL = rpmL * RPM_TO_RAD_S;     // rad/s
+//     float wR = -rpmR * RPM_TO_RAD_S;    // đảo chiều cho đồng bộ
+
+//     return {wL, wR};
+// }
+
+
+std::pair<float, float> ZLAC8015D_SDK::get_wheel_angular_velocities()
+{
+    auto [rpmL_raw, rpmR_raw] = get_rpm();
+
+    if (std::isnan(rpmL_raw) || std::isnan(rpmR_raw)) {
+        std::cerr << "❌ Unable to get RPM from the motor." << std::endl;
+        return {0.0f, 0.0f};
+    }
+
+    constexpr float RPM_TO_RAD_S = 2.0f * static_cast<float>(M_PI) / 60.0f;
+
+    // Nếu chỉ muốn đảo chiều (ví dụ right quay ngược so với left)
+    float wL = rpmL_raw * RPM_TO_RAD_S;      // rad/s
+    float wR = rpmR_raw * RPM_TO_RAD_S;      // rad/s  (hoặc -rpmR_raw nếu thực tế ngược chiều)
+
+    return {wL, wR};
 }
 
 

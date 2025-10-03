@@ -1,0 +1,9 @@
+<library path="nhatbot_sensor_broadcaster">
+  <class name="nhatbot_interface/SensorBroadcaster"
+         type="nhatbot_interface::SensorBroadcaster"
+         base_class_type="controller_interface::ControllerInterface">
+    <description>
+      Custom sensor broadcaster for battery voltage and motor temperature
+    </description>
+  </class>
+</library>

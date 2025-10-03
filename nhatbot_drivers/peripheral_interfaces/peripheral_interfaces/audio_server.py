@@ -18,10 +18,22 @@ class AudioServer(Node):
         self.declare_parameter('device', -1) 
         self.declare_parameter('target_samplerate', 48000)
         self.declare_parameter('voices_subdir', 'voices') 
+        self.declare_parameter('device_keyword', 'USB Audio')
 
 
-        self.device = self.get_parameter('device').get_parameter_value().integer_value
-        self.device = None if self.device < 0 else self.device
+        dev_param = self.get_parameter('device').get_parameter_value().integer_value
+        dev_keyword = self.get_parameter('device_keyword').get_parameter_value().string_value
+
+        
+
+        # self.device = None if self.device < 0 else self.device
+
+        if dev_param >= 0:
+           self.device =  dev_param
+        else:
+            self.device = self.find_usb_audio_device(dev_keyword)
+
+
         self.target_sr = self.get_parameter('target_samplerate').get_parameter_value().integer_value
 
         voices_subdir = self.get_parameter('voices_subdir').get_parameter_value().string_value
@@ -33,7 +45,21 @@ class AudioServer(Node):
         self.get_logger().info(f"Audio server ready | voices_dir={self.voices_dir} | device={self.device}")
 
 
-
+    def find_usb_audio_device(self, keyword="USB Audio"):
+        """Tìm index thiết bị audio theo tên"""
+        try:
+            devices = sd.query_devices()
+            for idx, dev in enumerate(devices):
+                name = dev.get('name', '')
+                max_out = dev.get('max_output_channels', 0)
+                if keyword.lower() in name.lower() and max_out > 0:
+                    self.get_logger().info(f"Auto-selected device {idx}: {name}")
+                    return idx
+            self.get_logger().warn(f"No device found with keyword='{keyword}', fallback to default")
+            return None
+        except Exception as e:
+            self.get_logger().error(f"Error querying devices: {e}")
+            return None
     def handle_play(self, req: PlayAudio.Request, resp: PlayAudio.Response):
         path = Path(req.path)
         print("path: ", path)

@@ -1,0 +1,14 @@
+<!-- <library path="nhatbot_firmware">
+  <class name="nhatbot_interface/NhatbotSensorInterface"
+         type="nhatbot_interface::NhatbotSensorInterface"
+         base_class_type="hardware_interface::SensorInterface">
+    <description>Sensor interface for battery, temp, fault from ZLAC driver</description>
+  </class>
+</library> -->
+
+
+<library path="nhatbot_firmware_sensor">
+  <class name="nhatbot_interface/NhatbotSensorInterface"
+         type="nhatbot_interface::NhatbotSensorInterface"
+         base_class_type="hardware_interface::SensorInterface"/>
+</library>

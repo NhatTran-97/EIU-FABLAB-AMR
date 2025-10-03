@@ -21,43 +21,58 @@ int main()
     // Gắn handler cho Ctrl+C
     std::signal(SIGINT, signalHandler);
 
-    if (!zlac_driver.openDriver("/dev/ttyUSB1", 115200, 1)) {
+    if (!zlac_driver.openDriver("/dev/ttyUSB1", 115200, 1)) 
+    {
         std::cerr << "❌ Không thể kết nối driver\n";
         return -1;
     }
 
     zlac_driver.enableMotor();
-    zlac_driver.setAccelTime(5000, 5000);
-    zlac_driver.setDecelTime(5000, 5000);
+    zlac_driver.setAccelTime(1000, 1000);
+    zlac_driver.setDecelTime(1000, 1000);
     zlac_driver.setMode(zlac_modbus::ControlMode::SPEED_RPM);
 
     while (true) {
-       // zlac_driver.setRPM(50, 50);
-        // auto travelled = zlac_modbus.get_wheels_travelled();
-        auto travelled = zlac_driver.get_wheels_travelled();
-        if(!std::isnan(travelled.first) && !std::isnan(travelled.second))
+
+
+        if (zlac_driver.clear_position(3)) 
         {
-            std::cout << "Left wheel traveled: " << travelled.first << " m, Right wheel travelled: " << travelled.second << " m" << std::endl;
-
-        }
-        else
-        {
-            std::cerr << "Failed to calculate wheel travelled distance" << std::endl; 
-        }
-        auto rpm = zlac_driver.get_rpm();
-        std::cout << "FB RPM -> Left: " << rpm.first << ", right: "<< rpm.second << std::endl;
-
-        auto ticks = zlac_driver.get_wheels_tick();
-        std::cout << "Encoder ticks -> Left: " << ticks.first << ", Right: " << ticks.second << std::endl;
-
-        float voltage = zlac_driver.get_battery_voltage();
-        std::cout << "Battery Voltage: " << voltage << " V" << std::endl;
-
-        if (zlac_driver.clear_position(3)) {
             std::cout << "Encoders reset thành công (cả 2 bên)" << std::endl;
         } else {
             std::cerr << "Reset encoder thất bại!" << std::endl;
         }
+
+    //    zlac_driver.setRPM(10, 60);
+    //     auto travelled = zlac_driver.get_wheels_travelled();
+    //     if(!std::isnan(travelled.first) && !std::isnan(travelled.second))
+    //     {
+    //         std::cout << "Left wheel traveled: " << travelled.first << " m, Right wheel travelled: " << travelled.second << " m" << std::endl;
+
+    //     }
+    //     else
+    //     {
+    //         std::cerr << "Failed to calculate wheel travelled distance" << std::endl; 
+    //     }
+    //     auto rpm = zlac_driver.get_rpm();
+    //     std::cout << "FB RPM -> Left: " << rpm.first << ", right: "<< rpm.second << std::endl;
+
+
+    //     auto [wL, wR]    = zlac_driver.get_wheel_angular_velocities();
+    //     std::cout << "Angular Vel (rad/s): L=" << wL << ", R=" << wR << std::endl;
+
+    //     // auto ticks = zlac_driver.get_wheels_tick();
+    //     // std::cout << "Encoder ticks -> Left: " << ticks.first << ", Right: " << ticks.second << std::endl;
+    //     std::this_thread::sleep_for(std::chrono::seconds(1));
+
+
+
+
+ /*
+
+        float voltage = zlac_driver.get_battery_voltage();
+        std::cout << "Battery Voltage: " << voltage << " V" << std::endl;
+
+
 
         std::string brake_state = zlac_driver.get_brake_state();
         std::cout << "Brake state: " << brake_state << std::endl;
@@ -70,7 +85,7 @@ int main()
 
 
         auto status = zlac_driver.get_motor_status();
-        
+
         std::cout << "Connected: " << status.connected << std::endl;
         std::cout << "Motor Enabled: " << status.enabled << std::endl;
         std::cout << "Mode: " << static_cast<int>(status.mode) << std::endl;
@@ -84,12 +99,12 @@ int main()
 
 
 
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        // std::this_thread::sleep_for(std::chrono::seconds(1));
 
         
 
         // zlac_driver.setRPM(0, 0);
-        // std::this_thread::sleep_for(std::chrono::seconds(1));
+        // std::this_thread::sleep_for(std::chrono::seconds(1));*/
     }
 
     return 0;

@@ -7,8 +7,11 @@ controller_manager:
       publish_rate: 50.0   # Hz - tần số publish joint_states
 
     diff_drive_controller:
-      type: diff_drive_controller/DiffDriveController
+      type: diff_drive_controller/DiffDriveController 
 
+    SensorBroadcaster:
+      type: nhatbot_interface/SensorBroadcaster
+      
 diff_drive_controller:
   ros__parameters:
 
@@ -20,8 +23,8 @@ diff_drive_controller:
     state_interfaces: ["position", "velocity"]
 
     # Các tham số vật lý (sửa theo robot thực tế)
-    wheel_separation: 0.116    # (m) khoảng cách 2 bánh
-    wheel_radius: 0.017        # (m) bán kính bánh xe
+    wheel_separation: 0.45   # (m) khoảng cách 2 bánh
+    wheel_radius: 0.0535        # (m) bán kính bánh xe
 
     # Cấu hình odometry
     odom_frame_id: "odom"
@@ -33,13 +36,18 @@ diff_drive_controller:
     linear:
       x:
         has_velocity_limits: true
-        max_velocity: 1.0     # m/s
-        min_velocity: -1.0
+        max_velocity: 0.5     # m/s
+        min_velocity: -0.5
     angular:
       z:
         has_velocity_limits: true
-        max_velocity: 1.0     # rad/s
-        min_velocity: -1.0
+        max_velocity: 0.5     # rad/s
+        min_velocity: -0.5
 
     # Nếu muốn dùng TwistStamped thay vì Twist thường
     use_stamped_vel: true
+
+
+SensorBroadcaster:
+  ros__parameters:
+    publish_rate: 10.0   # cái này bạn tự thêm nếu muốn

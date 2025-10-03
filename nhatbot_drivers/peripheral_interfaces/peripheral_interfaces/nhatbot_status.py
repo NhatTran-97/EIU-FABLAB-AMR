@@ -14,6 +14,8 @@ from nhatbot_msgs.srv import PlayAudio
 from ament_index_python.packages import get_package_share_directory
 from pathlib import Path
 
+rail0_path = "/sys/devices/3160000.i2c/i2c-0/0-0040/iio:device0/in_voltage0_input"
+
 
 @dataclass(frozen=True)
 class Pins:
@@ -28,23 +30,20 @@ class Pins:
     mid_computer_battery: int = 7
     low_computer_battery: int = 21
 
-
 @dataclass(frozen=True)
 class BatteryLevel:
     FULL: float = field(default=29.8)
     WARN: float = field(default=28.0)
     LOW: float = field(default=25.5)
 
-
-
-
+    FULL_TX2: float = field(default=19.5)
+    WARN_TX2: float = field(default=11.0)
+    LOW_TX2: float = field(default=10.5)
 
 class NhatbotStatus(Node):
     def __init__(self):
         super().__init__('nhatbot_status')
         self.cb_group = ReentrantCallbackGroup()
-
-     
 
         self.declare_parameter('voice_files', ['xin_chao_anh_danh', 'xin_chao_hieu_truong', 'em_chao_dai_ca_nhat', 'vat_can'])
         self.voice_list = self.get_parameter('voice_files').get_parameter_value().string_array_value
@@ -61,16 +60,18 @@ class NhatbotStatus(Node):
             self.get_logger().error("Parameter voice_files is empty")
             return 
 
-
         self.pins = Pins()
         self.led_state = False     
         self.error_blinking = False    
         
-    
         self.last_time_led = time.monotonic()
         self.last_time_beep = time.monotonic()
         self.last_request_time = time.monotonic()
         self.request_interval = 4
+
+
+        self.last_update_tx2_voltage = time.monotonic()
+        self.tx2_interval = 5
 
         self.audio_confirm_response = True
        
@@ -110,6 +111,15 @@ class NhatbotStatus(Node):
                 raise
 
         self.robot_status_display(True, False, False)
+    
+    def read_voltage_tx2(self, path):
+        try:
+            with open(path, "r") as f:
+                mv = int(f.read().strip())
+                return mv / 1000.0
+        except Exception as e:
+            print(f"Path is error {path}: {e}")
+            return None
 
 
     def robot_status_callback(self, msg: ZlacStatus) -> None:
@@ -152,6 +162,16 @@ class NhatbotStatus(Node):
         if self.robot_status is None or self.safety_stop is None:
             return 
         
+        if now - self.last_update_tx2_voltage >= self.tx2_interval:
+            vol_tx2_in = self.read_voltage_tx2(rail0_path)
+            if vol_tx2_in is not None:
+                if BatteryLevel.WARN_TX2 < vol_tx2_in <= BatteryLevel.FULL_TX2:
+                    self.led_computer_display("full")
+                elif BatteryLevel.LOW_TX2 < vol_tx2_in <= BatteryLevel.WARN_TX2:
+                    self.led_computer_display("warn")
+                else:
+                    self.led_computer_display("low")
+
         if BatteryLevel.WARN <= self.robot_status.battery_voltage < BatteryLevel.FULL:  
             self.led_motor_display('full')
             self.error_blinking = False
@@ -178,7 +198,6 @@ class NhatbotStatus(Node):
                     self.audio_confirm_response = False 
                     self.call_request_audio()
                     self.last_request_time = now 
-                    
 
             if not self.error_blinking:  
                 self.robot_status_display(False, False, None)
@@ -269,6 +288,18 @@ class NhatbotStatus(Node):
             GPIO.output(self.pins.mid_motor_battery, GPIO.HIGH)
         elif voltage_level == 'low':
             GPIO.output(self.pins.low_motor_battery, GPIO.HIGH)
+    
+    def led_computer_display(self, voltage_level:str)->None:
+        GPIO.output(self.pins.full_computer_battery, GPIO.LOW)
+        GPIO.output(self.pins.mid_computer_battery, GPIO.LOW)
+        GPIO.output(self.pins.low_computer_battery, GPIO.LOW)
+
+        if voltage_level == 'full':
+            GPIO.output(self.pins.full_computer_battery, GPIO.HIGH)
+        elif voltage_level == 'mid':
+            GPIO.output(self.pins.mid_motor_battery, GPIO.HIGH)
+        elif voltage_level == 'low':
+            GPIO.output(self.pins.low_computer_battery, GPIO.HIGH)
 
 
     def robot_status_display(self, G=True, Y=False, R=False):

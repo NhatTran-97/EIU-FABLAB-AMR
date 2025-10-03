@@ -98,6 +98,7 @@ namespace zlac_modbus
         MotorStatus get_motor_status();
         std::pair<float, float> get_linear_velocities();
         float rpm_to_linear(float rpm);
+        std::pair<float, float> get_wheel_angular_velocities();
 
 
 

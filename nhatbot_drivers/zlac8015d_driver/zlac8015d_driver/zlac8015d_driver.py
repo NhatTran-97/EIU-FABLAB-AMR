@@ -31,91 +31,6 @@ class ZLAC8015D_API:
 
         self.ID = 1
         
-        # -----Register Address-----
-
-        ## Common
-        # CONTROL_REG = 0x200E # {0x05: emergency stop, 0x06: clear stop, 0x07: stop, 0x08: enable}
-        # OPR_MODE = 0x200D     # control mode
-        # L_ACL_TIME= 0x2080
-        # R_ACL_TIME = 0x2081
-        # L_DCL_TIME = 0x2082
-        # R_DCL_TIME = 0x2083
-
-        # clear feedback position
-        # CLR_FB_POS = 0x2005
-
-        ## Velocity control (Speed RPM Control)
-        # Target velocity Range: --450~450/min
-
-        # L_CMD_RPM = 0x2088
-        # R_CMD_RPM= 0x2089
-
-        
-
-        # Position control
-        # L_FB_POS_HI = 0x20A7
-        # POS_CONTROL_TYPE = 0x200F  # Synchronous/asynchronous control status
-
-        # L_MAX_RPM_POS = 0x208E # Not in use
-        # L_CMD_REL_POS_HI = 0x208A # Not in use
-
-
-        # Actual velocity  unit: 0.1r/min
-        # L_FB_RPM = 0x20AB
-        # R_FB_RPM= 0x20AC
-
-
-        ########################
-		## Control CMDs (REG) ##
-		########################
-
-        # EMER_STOP = 0x05 # emergency stop
-        # ALRM_CLR = 0x06 # clear default 
-        # DOWN_TIME = 0x07 # stop
-        # ENABLE= 0x08    # enable
-
-        # POS_SYNC = 0x10
-        # POS_L_START= 0x11
-        # POS_R_START = 0x12
-
-
-        ####################
-		## Operation Mode ##
-		####################
-
-        # POS_REL_CONTROL = 1
-        # POS_ABS_CONTROL = 2
-        # VEL_CONTROL = 3
-
-        # ASYNC= 0
-        # SYNC = 1
-
-
-        ## Troubleshooting
-        # L_FAULT = 0x20A5
-        # R_FAULT = 0x20A6
-
-        #################
-		## Fault codes ##
-		#################
-
-        # NO_FAULT= 0x0000       # No error
-        # OVER_VOLT= 0x0001      # Over voltage
-        # UNDER_VOLT= 0x0002     # Under voltage
-        # OVER_CURR = 0x0004      # Over current
-        # OVER_LOAD = 0x0008      # Over load
-        # CURR_OUT_TOL = 0x0010   # Current out of tolerance
-        # ENCOD_OUT_TOL = 0x0020  # Encoder out of tolerance
-        # MOTOR_BAD = 0x0040      # Velocity out of tolerance
-        # REF_VOLT_ERROR = 0x0080 # Reference voltage error
-        # EEPROM_ERROR = 0x0100   # EEPROM error
-        # WALL_ERROR = 0x0200     # Hall error
-        # HIGH_TEMP = 0x0400      # Motor temperature over temperature
-
-        # self.FAULT_LIST = [OVER_VOLT, UNDER_VOLT, OVER_CURR, OVER_LOAD, CURR_OUT_TOL, ENCOD_OUT_TOL, \
-		# 			MOTOR_BAD, REF_VOLT_ERROR, EEPROM_ERROR, WALL_ERROR, HIGH_TEMP]
-    
-
         ## 4 inches wheel
         self.travel_in_one_rev = self.param.travel_in_one_rev
         self.cpr = self.param.cpr
@@ -207,7 +122,20 @@ class ZLAC8015D_API:
         print(f"❌ Unable read Modbus address {ADDR} after {max_retries} attempts!")
         return reg  # Return default value if failed 
 
+
+    def _u16_to_s16(self, u):
+        u = int(u) & 0xFFFF
+        return u - 0x10000 if (u & 0x8000) else u
+
+    def _join_u16_to_s32(self, hi, lo):
+        u32 = ((int(hi) & 0xFFFF) << 16) | (int(lo) & 0xFFFF)
+        return u32 - 0x100000000 if (u32 & 0x80000000) else u32
+
+    def _int16_to_u16(self, v):
+        # gửi xuống Modbus: signed int16 -> dạng u16 (two's complement)
+        return int(v) & 0xFFFF
     
+
     def rpm_to_radPerSec(self, rpm):
 
         """Convert RPM to radians per second"""
@@ -330,46 +258,86 @@ class ZLAC8015D_API:
             print(f"❌ Error setting deceleration: {str(e)}")
 
     
+    # def get_rpm(self):
+    #     """Get the RPM (rotations per minute) of the motor"""
+    #     if not self.is_connected():
+    #         print("⚠️ Unable to get RPM speed: Modbus connection lost!")
+    #         return 0.0, 0.0  # Return default value to avoid errors
+
+    #     registers = self.modbus_fail_read_handler(modbus_register.L_FB_RPM, 2)
+
+    #     # 🔍 Check if data reading fails
+    #     if registers is None or len(registers) < 2:
+    #         print("❌ Error: Unable to read RPM from the motor!")
+    #         return 0.0, 0.0  # Return default value to avoid errors
+
+    #     try:
+    #         fb_L_rpm = np.int16(registers[0]) / 10.0
+    #         fb_R_rpm = np.int16(registers[1]) / 10.0
+    #         return fb_L_rpm, fb_R_rpm
+    #     except (IndexError, TypeError) as e:
+    #         print(f"❌ Error processing RPM data: {str(e)}")
+    #         return 0.0, 0.0  # Return default value to avoid errors
+
+
     def get_rpm(self):
-        """Get the RPM (rotations per minute) of the motor"""
         if not self.is_connected():
             print("⚠️ Unable to get RPM speed: Modbus connection lost!")
-            return 0.0, 0.0  # Return default value to avoid errors
+            return 0.0, 0.0
 
         registers = self.modbus_fail_read_handler(modbus_register.L_FB_RPM, 2)
-
-        # 🔍 Check if data reading fails
-        if registers is None or len(registers) < 2:
+        if not registers or len(registers) < 2:
             print("❌ Error: Unable to read RPM from the motor!")
-            return 0.0, 0.0  # Return default value to avoid errors
+            return 0.0, 0.0
 
         try:
-            fb_L_rpm = np.int16(registers[0]) / 10.0
-            fb_R_rpm = np.int16(registers[1]) / 10.0
+            l_raw, r_raw = registers[0], registers[1]
+            fb_L_rpm = self._u16_to_s16(l_raw) / 10.0
+            fb_R_rpm = self._u16_to_s16(r_raw) / 10.0
             return fb_L_rpm, fb_R_rpm
-        except (IndexError, TypeError) as e:
-            print(f"❌ Error processing RPM data: {str(e)}")
-            return 0.0, 0.0  # Return default value to avoid errors
+        except Exception as e:
+            print(f"❌ Error processing RPM data: {e}")
+            return 0.0, 0.0
+
+
+    # def set_rpm(self, L_rpm, R_rpm):
+    #     """Send RPM control command, ensure reconnection if connection is lost"""
+        
+    #     if not self.is_connected():  # Use the fixed is_connected() method
+    #         print("⚠ Unable to send RPM command because Modbus is not connected!")
+    #         return  # ❌ Do not send command if not connected
+        
+    #     L_rpm = max(min(L_rpm, self.param.max_rpm), -self.param.max_rpm)
+    #     R_rpm = max(min(R_rpm, self.param.max_rpm), -self.param.max_rpm)
+
+    #     left_bytes = self.int16Dec_to_int16Hex(L_rpm)
+    #     right_bytes = self.int16Dec_to_int16Hex(R_rpm)
+
+    #     try:
+    #         self.client.write_registers(modbus_register.L_CMD_RPM, [left_bytes, right_bytes], unit=self.ID)
+    #     except pymodbus.exceptions.ConnectionException as e:
+    #         print(f"❌ Modbus connection error when sending set_rpm: {str(e)}")
+    #     except Exception as e:
+    #         print(f"❌ Unknown error when sending set_rpm: {str(e)}")
 
     def set_rpm(self, L_rpm, R_rpm):
-        """Send RPM control command, ensure reconnection if connection is lost"""
-        
-        if not self.is_connected():  # Use the fixed is_connected() method
+        if not self.is_connected():
             print("⚠ Unable to send RPM command because Modbus is not connected!")
-            return  # ❌ Do not send command if not connected
-        
+            return
+
         L_rpm = max(min(L_rpm, self.param.max_rpm), -self.param.max_rpm)
         R_rpm = max(min(R_rpm, self.param.max_rpm), -self.param.max_rpm)
 
-        left_bytes = self.int16Dec_to_int16Hex(L_rpm)
-        right_bytes = self.int16Dec_to_int16Hex(R_rpm)
+        left_u16  = self._int16_to_u16(L_rpm)
+        right_u16 = self._int16_to_u16(R_rpm)
 
         try:
-            self.client.write_registers(modbus_register.L_CMD_RPM, [left_bytes, right_bytes], unit=self.ID)
+            self.client.write_registers(modbus_register.L_CMD_RPM, [left_u16, right_u16], unit=self.ID)
         except pymodbus.exceptions.ConnectionException as e:
-            print(f"❌ Modbus connection error when sending set_rpm: {str(e)}")
+            print(f"❌ Modbus connection error when sending set_rpm: {e}")
         except Exception as e:
-            print(f"❌ Unknown error when sending set_rpm: {str(e)}")
+            print(f"❌ Unknown error when sending set_rpm: {e}")
+
 
 
     def stop_motor_emergency(self):
@@ -431,58 +399,87 @@ class ZLAC8015D_API:
 
         return (val - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
 
-    def get_wheels_travelled(self):
-        """Get the distance travelled by the wheels (radian unit)"""
+    # def get_wheels_travelled(self):
+    #     """Get the distance travelled by the wheels (radian unit)"""
         
-        registers = self.modbus_fail_read_handler(modbus_register.L_FB_POS_HI, 4)
-        if registers is None or len(registers) < 4:
+    #     registers = self.modbus_fail_read_handler(modbus_register.L_FB_POS_HI, 4)
+    #     if registers is None or len(registers) < 4:
+    #         self.node.get_logger().error("❌ Error reading wheel position data from Modbus!")
+    #         return None, None
+
+    #     try:
+    #         l_pul_hi, l_pul_lo = registers[0], registers[1]
+    #         r_pul_hi, r_pul_lo = registers[2], registers[3]
+
+    #         # Combine registers into 32-bit value
+    #         l_pulse = np.int32(((l_pul_hi & 0xFFFF) << 16) | (l_pul_lo & 0xFFFF))
+    #         r_pulse = np.int32(((r_pul_hi & 0xFFFF) << 16) | (r_pul_lo & 0xFFFF))
+
+    #         # Convert to angle (radian)
+    #         l_travelled = ((float(l_pulse) / self.cpr) * self.travel_in_one_rev) / self.R_Wheel
+    #         r_travelled = ((float(r_pulse) / self.cpr) * self.travel_in_one_rev) / self.R_Wheel
+            
+    #         return -l_travelled, r_travelled
+
+    #     except OverflowError:
+    #         self.node.get_logger().error("❌ Overflow error while calculating wheel position!")
+    #         return None, None
+    def get_wheels_travelled(self):
+        regs = self.modbus_fail_read_handler(modbus_register.L_FB_POS_HI, 4)
+        if not regs or len(regs) < 4:
             self.node.get_logger().error("❌ Error reading wheel position data from Modbus!")
             return None, None
-
         try:
-            l_pul_hi, l_pul_lo = registers[0], registers[1]
-            r_pul_hi, r_pul_lo = registers[2], registers[3]
+            l_pulse = self._join_u16_to_s32(regs[0], regs[1])
+            r_pulse = self._join_u16_to_s32(regs[2], regs[3])
 
-            # Combine registers into 32-bit value
-            l_pulse = np.int32(((l_pul_hi & 0xFFFF) << 16) | (l_pul_lo & 0xFFFF))
-            r_pulse = np.int32(((r_pul_hi & 0xFFFF) << 16) | (r_pul_lo & 0xFFFF))
-
-            # Convert to angle (radian)
-            l_travelled = ((float(l_pulse) / self.cpr) * self.travel_in_one_rev) / self.R_Wheel
-            r_travelled = ((float(r_pulse) / self.cpr) * self.travel_in_one_rev) / self.R_Wheel
-            
-            return -l_travelled, r_travelled
-
-        except OverflowError:
-            self.node.get_logger().error("❌ Overflow error while calculating wheel position!")
+            # -> rad: (pulses/CPR) * (2πR) / R = (pulses/CPR)*2π
+            # travel_in_one_rev = 2πR  (như bạn đang làm) => công thức dưới OK
+            l_travelled = ((float(l_pulse) / float(self.cpr)) * float(self.travel_in_one_rev)) / float(self.R_Wheel)
+            r_travelled = ((float(r_pulse) / float(self.cpr)) * float(self.travel_in_one_rev)) / float(self.R_Wheel)
+            return -float(l_travelled), float(r_travelled)
+        except Exception as e:
+            self.node.get_logger().error(f"❌ Overflow/compute error while calculating wheel position: {e}")
             return None, None
+
+    # def get_wheels_tick(self):
+    #     """Get the number of ticks from the left and right wheel encoders"""
+        
+    #     try:
+    #         registers = self.modbus_fail_read_handler(modbus_register.L_FB_POS_HI, 4)
+    #         if registers is None or len(registers) < 4:
+    #             self.node.get_logger().error("❌ Error reading encoder data from Modbus!")
+    #             return None, None
+
+    #         l_pul_hi, l_pul_lo = registers[0], registers[1]
+    #         r_pul_hi, r_pul_lo = registers[2], registers[3]
+
+    #         # Combine register into 32-bit value
+    #         l_tick = np.int32(((l_pul_hi & 0xFFFF) << 16) | (l_pul_lo & 0xFFFF))
+    #         r_tick = np.int32(((r_pul_hi & 0xFFFF) << 16) | (r_pul_lo & 0xFFFF))
+
+    #         return l_tick, r_tick
+
+    #     except OverflowError:
+    #         self.node.get_logger().error("❌ Overflow error while reading encoder tick!")
+    #         return None, None
+
+    #     except IndexError:
+    #         self.node.get_logger().error("❌ Modbus data returned insufficient elements!")
+    #         return None, None
 
     def get_wheels_tick(self):
-        """Get the number of ticks from the left and right wheel encoders"""
-        
+        regs = self.modbus_fail_read_handler(modbus_register.L_FB_POS_HI, 4)
+        if not regs or len(regs) < 4:
+            self.node.get_logger().error("❌ Error reading encoder data from Modbus!")
+            return None, None
         try:
-            registers = self.modbus_fail_read_handler(modbus_register.L_FB_POS_HI, 4)
-            if registers is None or len(registers) < 4:
-                self.node.get_logger().error("❌ Error reading encoder data from Modbus!")
-                return None, None
-
-            l_pul_hi, l_pul_lo = registers[0], registers[1]
-            r_pul_hi, r_pul_lo = registers[2], registers[3]
-
-            # Combine register into 32-bit value
-            l_tick = np.int32(((l_pul_hi & 0xFFFF) << 16) | (l_pul_lo & 0xFFFF))
-            r_tick = np.int32(((r_pul_hi & 0xFFFF) << 16) | (r_pul_lo & 0xFFFF))
-
-            return l_tick, r_tick
-
-        except OverflowError:
-            self.node.get_logger().error("❌ Overflow error while reading encoder tick!")
+            l_tick = self._join_u16_to_s32(regs[0], regs[1])
+            r_tick = self._join_u16_to_s32(regs[2], regs[3])
+            return int(l_tick), int(r_tick)
+        except Exception as e:
+            self.node.get_logger().error(f"❌ Overflow/compute error while reading encoder tick: {e}")
             return None, None
-
-        except IndexError:
-            self.node.get_logger().error("❌ Modbus data returned insufficient elements!")
-            return None, None
-
 
     def set_position_async_control(self):
         """Set asynchronous position control mode"""
@@ -507,16 +504,24 @@ class ZLAC8015D_API:
 
     
 
-    def int16Dec_to_int16Hex(self, int16):
-        """onvert 16-bit integer from decimal to hex"""
+    # def int16Dec_to_int16Hex(self, int16):
+    #     """onvert 16-bit integer from decimal to hex"""
+    #     try:
+    #         int16 = np.int16(int16)  # Ensure valid value
+    #         lo_byte = int16 & 0x00FF
+    #         hi_byte = (int16 & 0xFF00) >> 8
+    #         return (hi_byte << 8) | lo_byte
+    #     except Exception as e:
+    #         self.node.get_logger().error(f"❌ Error converting number {str(e)}")
+    #         return None
+    def int16Dec_to_int16Hex(self, val):
         try:
-            int16 = np.int16(int16)  # Ensure valid value
-            lo_byte = int16 & 0x00FF
-            hi_byte = (int16 & 0xFF00) >> 8
-            return (hi_byte << 8) | lo_byte
+            # Trả về u16 để ghi xuống 1 thanh ghi 16-bit (pymodbus chấp nhận 0..65535)
+            return self._int16_to_u16(val)
         except Exception as e:
-            self.node.get_logger().error(f"❌ Error converting number {str(e)}")
+            self.node.get_logger().error(f"❌ Error converting number {e}")
             return None
+
 
 
     def close_connect(self):
