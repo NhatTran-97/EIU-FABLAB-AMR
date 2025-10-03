@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(nhatbot_msgs)
+project(nhatbot_utils)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -7,20 +7,26 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-find_package(std_msgs REQUIRED)
-find_package(rosidl_default_generators REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(rclpy REQUIRED)
 
-rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/ZlacStatus.msg"
-  "msg/EulerDegrees.msg"
-  "msg/LaneSteering.msg"
-  "srv/PlayAudio.srv"
+install(PROGRAMS
 
-  DEPENDENCIES std_msgs
+  ${PROJECT_NAME}/waypoint_visualization.py 
+  # ${PROJECT_NAME}/a_star_planner.py
+
+
+ DESTINATION lib/${PROJECT_NAME}
+)
+
+install(
+  DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
 )
 
 
-# ament_export_dependencies(rosidl_default_runtime)
+
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   set(ament_cmake_copyright_FOUND TRUE)
