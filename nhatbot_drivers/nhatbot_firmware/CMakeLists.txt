@@ -18,6 +18,7 @@ find_package(rclcpp_lifecycle REQUIRED)
 find_package(hardware_interface REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(controller_interface REQUIRED)
+find_package(std_srvs REQUIRED)
 
 
 find_package(PkgConfig REQUIRED)
@@ -93,20 +94,24 @@ pluginlib_export_plugin_description_file(hardware_interface sensor_interfaces.xm
 # Sensor Broadcaster plugin
 # ------------------------------
 
-add_library(nhatbot_sensor_broadcaster SHARED
-  src/sensor_broadcaster.cpp
-)
+add_library(nhatbot_sensor_broadcaster SHARED src/sensor_broadcaster.cpp)
 target_include_directories(nhatbot_sensor_broadcaster PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
-)
+  $<INSTALL_INTERFACE:include>)
+
 ament_target_dependencies(nhatbot_sensor_broadcaster
   controller_interface
   pluginlib
   rclcpp
   sensor_msgs
   std_msgs
+  std_srvs
 )
+target_link_libraries(nhatbot_sensor_broadcaster
+  zlac_sdk
+  ${LIBMODBUS_LIBRARIES}
+)
+
 pluginlib_export_plugin_description_file(controller_interface sensor_broadcasters.xml)
 
 

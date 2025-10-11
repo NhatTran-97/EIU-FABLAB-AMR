@@ -35,6 +35,8 @@ RUN apt-get update && apt-get install -y \
     ros-humble-rviz2 \
     ros-humble-tf-transformations \
     ros-humble-joy \
+    ros-humble-ros2-control \
+    ros-humble-ros2-controllers \
     ros-humble-joy-teleop \
     ros-humble-cv-bridge \
     ros-humble-xacro \

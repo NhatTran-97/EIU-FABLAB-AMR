@@ -33,7 +33,7 @@ def generate_launch_description():
 
     return LaunchDescription([
             safety_stop_node,
-            audio_server_node,
+            # audio_server_node,
             nhatbot_status_node
     ])
 

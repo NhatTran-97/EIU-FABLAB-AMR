@@ -19,6 +19,13 @@
 
 namespace zlac_modbus
 {
+    enum class ClearPos : uint8_t
+    {
+        NONE = 0,
+        LEFT = 1,
+        RIGHT = 2, BOTH = 3,
+    };
+
     enum class ControlMode : uint8_t 
     {
         RELATIVE_POSITION = 1,
@@ -94,7 +101,7 @@ namespace zlac_modbus
         std::string get_brake_state();
         bool stop_motor_emergency();
         bool clear_alarm();
-        bool clear_position(int pos);
+        bool clear_position(ClearPos pos);
         MotorStatus get_motor_status();
         std::pair<float, float> get_linear_velocities();
         float rpm_to_linear(float rpm);

@@ -76,30 +76,33 @@ fi
 
 
 
-ESP_USB_PATH_HINT="1-2.4"  # path của ESP, lấy bằng udevadm info
+# ESP_USB_PATH_HINT="1-2.4"  # path của ESP, lấy bằng udevadm info
 
-log_info "Scanning for ESP device at USB path: $ESP_USB_PATH_HINT..."
-ESP_PORT=""
-for dev in /dev/ttyUSB* /dev/ttyACM*; do
-    [[ -e "$dev" ]] || continue
-    udev_path="$(udevadm info -q path -n "$dev" 2>/dev/null || true)"
-    if echo "$udev_path" | grep -q "$ESP_USB_PATH_HINT"; then
-        ESP_PORT="$dev"
-        break
-    fi
-done
+# log_info "Scanning for ESP device at USB path: $ESP_USB_PATH_HINT..."
+# ESP_PORT=""
+# for dev in /dev/ttyUSB* /dev/ttyACM*; do
+#     [[ -e "$dev" ]] || continue
+#     udev_path="$(udevadm info -q path -n "$dev" 2>/dev/null || true)"
+#     if echo "$udev_path" | grep -q "$ESP_USB_PATH_HINT"; then
+#         ESP_PORT="$dev"
+#         break
+#     fi
+# done
 
-if [[ -z "$ESP_PORT" && -e /dev/esp_device ]]; then
-    ESP_PORT="/dev/esp_device"
-fi
+# if [[ -z "$ESP_PORT" && -e /dev/esp_device ]]; then
+#     ESP_PORT="/dev/esp_device"
+# fi
 
-if [[ -z "$ESP_PORT" ]]; then
-    log_fail "ESP device not found at path $ESP_USB_PATH_HINT"
-    exit 1
-else
-    ESP_HOST_REAL="$(readlink -f "$ESP_PORT" 2>/dev/null || echo "$ESP_PORT")"
-    log_ok "ESP device found: alias=$ESP_PORT real=$ESP_HOST_REAL"
-fi
+# if [[ -z "$ESP_PORT" ]]; then
+#     log_fail "ESP device not found at path $ESP_USB_PATH_HINT"
+#     exit 1
+# else
+#     ESP_HOST_REAL="$(readlink -f "$ESP_PORT" 2>/dev/null || echo "$ESP_PORT")"
+#     log_ok "ESP device found: alias=$ESP_PORT real=$ESP_HOST_REAL"
+# fi
+
+
+
 
 
 log_info "Launching Docker container..."
@@ -118,7 +121,6 @@ sudo docker run -it \
     --device "$LIDAR_PORT":/dev/rplidar \
     --device "$ZLAC_PORT":/dev/zlac_8015d \
     --device "$ARDUINO_PORT":/dev/arduino_mega \
-    --device "$ESP_HOST_REAL":/dev/esp_device \
     --device /dev/bus/usb:/dev/bus/usb \
     --device /dev/snd:/dev/snd \
     --device=/dev/ttyTHS1 \

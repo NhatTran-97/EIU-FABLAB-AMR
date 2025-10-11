@@ -38,6 +38,8 @@ def generate_launch_description():
     twist_mux_pkg = get_package_share_directory("twist_mux")
     rosbridge_pkg = get_package_share_directory("rosbridge_server")
     bno055_pkg = get_package_share_directory("bno055")
+    firmware_pkg = get_package_share_directory("nhatbot_firmware")
+    lidar_pkg = get_package_share_directory("ros2_lidar")
 
     # Joy node (joystick driver)
     joy_node = Node(
@@ -120,15 +122,19 @@ def generate_launch_description():
     rosbridge_launch = IncludeLaunchDescription(AnyLaunchDescriptionSource(os.path.join(rosbridge_pkg, "launch", "rosbridge_websocket_launch.xml")))
 
     # Call service reset_feedback_position
-    reset_feedback_service = ExecuteProcess(cmd=["ros2", "service", "call", "/nhatbot/reset_feedback_position", "std_srvs/srv/Trigger"],output="screen")
+    reset_feedback_service = ExecuteProcess(cmd=["ros2", "service", "call", "/SensorBroadcaster/reset_encoder", "std_srvs/srv/Trigger"],output="screen")
 
     # Call service reset_odom
     reset_odom_service = ExecuteProcess(cmd=["ros2", "service", "call", "/reset_odom", "std_srvs/srv/Trigger"], output="screen")
 
-    lidar_node = IncludeLaunchDescription(os.path.join(get_package_share_directory("nhatbot_stack"),"launch", "lidar_a1_filter.launch.py"),)
+    # lidar_node = IncludeLaunchDescription(os.path.join(get_package_share_directory("nhatbot_stack"),"launch", "lidar_a1_filter.launch.py"),)
     a_star_node = IncludeLaunchDescription(os.path.join(get_package_share_directory("nhatbot_planner"),"launch", "nhatbot_planner.launch.py"),)
     localization_node = IncludeLaunchDescription(os.path.join(get_package_share_directory("nhatbot_stack"),"launch", "robot_localization.launch.py"),condition=IfCondition(use_localization))
     utils_nodes = IncludeLaunchDescription(os.path.join(nhatbot_stack_pkg,"launch", "utils.launch.py"),)
+
+    hw_interface_node = IncludeLaunchDescription(os.path.join(firmware_pkg,"launch", "bringup_hardware_interface.launch.py"),)
+
+    lidar_node = IncludeLaunchDescription(os.path.join(lidar_pkg,"launch","ole2dv2_launch.py"),)
 
     
     usb_cam = Node(
@@ -157,9 +163,10 @@ def generate_launch_description():
         name="rviz2",
         output="screen",
         arguments=["-d", os.path.join(nhatbot_stack_pkg, "rviz", "nav2_default_view.rviz")],
-        condition=IfCondition(use_rviz)
-    )
-            
+        condition=IfCondition(use_rviz))
+
+
+
     # Return the LaunchDescription
     return LaunchDescription([
         use_sim_time_arg,
@@ -174,20 +181,28 @@ def generate_launch_description():
         twist_relay_node,
         joy_to_twist,
         twist_mux_launch,
-        zlac_driver,
-        velocity_controller_node_py,
-        velocity_controller_node_cpp,
-        odom_estimator_node,
-        # rosbridge_launch,
+        hw_interface_node, 
         reset_feedback_service,
-        lidar_node,
-        localization_node,
-        a_star_node,
-        # usb_cam,
-        utils_nodes,
         bno055_launch,
-        micro_ros_node, 
+        static_pub,
+        lidar_node,
 
-        rviz_node,
-        # static_pub
+
+
+
+        #velocity_controller_node_py,
+        #velocity_controller_node_cpp,
+        #odom_estimator_node,
+        # rosbridge_launch,
+        
+      
+       # localization_node,
+        # a_star_node,
+        # usb_cam,
+    #    utils_nodes,
+    
+        # micro_ros_node, 
+
+     #   rviz_node,
+      
     ])

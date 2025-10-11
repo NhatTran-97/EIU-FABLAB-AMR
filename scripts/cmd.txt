@@ -48,3 +48,6 @@ KERNEL=="ttyUSB*", KERNELS=="1-2.4", ATTRS{idVendor}=="10c4", ATTRS{idProduct}==
 
 KERNEL=="ttyACM*", ATTRS{idVendor}=="2341", ATTRS{idProduct}=="0042", ATTRS{serial}=="55739323837351017271", MODE:="0777", SYMLINK+="arduino_mega", GROUP="dialout"
 
+
+
+--device "$ESP_HOST_REAL":/dev/esp_device \

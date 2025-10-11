@@ -21,9 +21,9 @@ def generate_launch_description():
         package="controller_manager",
         executable="ros2_control_node",
         parameters=[
-            {"robot_description": robot_description},
-            controllers_file
-        ],
+            {"robot_description": robot_description}, controllers_file],
+
+        remappings=[('/diff_drive_controller/cmd_vel', '/nhatbot/cmd_vel')],
         output="screen"
     )
 
@@ -33,6 +33,7 @@ def generate_launch_description():
         executable="spawner",
         arguments=['joint_state_broadcaster',
                    '--controller-manager', '/controller_manager'],
+        
         output='screen'
     )
 

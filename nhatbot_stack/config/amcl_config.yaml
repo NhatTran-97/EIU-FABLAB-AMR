@@ -18,8 +18,8 @@ amcl:
     laser_min_range: -1.0
     laser_model_type: "likelihood_field"
     max_beams: 60
-    max_particles: 8000
-    min_particles: 2000
+    max_particles: 5000
+    min_particles: 1000
     odom_frame_id: "odom"
     scan_topic: "/scan_filtered"
     pf_err: 0.05

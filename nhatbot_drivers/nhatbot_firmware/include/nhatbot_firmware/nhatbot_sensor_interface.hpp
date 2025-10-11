@@ -19,7 +19,9 @@ public:
     NhatbotSensorInterface() = default;
     ~NhatbotSensorInterface() override = default;
 
+ //   CallbackReturn on_init(const hardware_interface::HardwareInfo &hardware_info) override;
     CallbackReturn on_init(const hardware_interface::HardwareInfo &hardware_info) override;
+
     std::vector<hardware_interface::StateInterface> export_state_interfaces() override;
     hardware_interface::return_type read(const rclcpp::Time &, const rclcpp::Duration &) override;
 

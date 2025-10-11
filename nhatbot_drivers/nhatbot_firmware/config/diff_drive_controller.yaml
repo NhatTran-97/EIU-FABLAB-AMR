@@ -15,39 +15,70 @@ controller_manager:
 diff_drive_controller:
   ros__parameters:
 
-    left_wheel_names: ["wheel_left_joint"]
-    right_wheel_names: ["wheel_right_joint"]
+    left_wheel_names: ["wheel_right_joint"] # wheel_left_joint
+    right_wheel_names: ["wheel_left_joint"] # wheel_right_joint
 
-    # Các interface mà hardware_interface của bạn export ra
+    # state interface and command interface parameters
     command_interfaces: ["velocity"]
     state_interfaces: ["position", "velocity"]
 
-    # Các tham số vật lý (sửa theo robot thực tế)
-    wheel_separation: 0.45   # (m) khoảng cách 2 bánh
-    wheel_radius: 0.0535        # (m) bán kính bánh xe
+    # Actual physical parameters
+    wheel_separation: 0.45   # (m) Distance betweem two wheels
+    wheel_radius: 0.0535        # Wheel radius (m unit)
 
-    # Cấu hình odometry
+    wheel_separation_multiplier: 1.0
+    left_wheel_radius_multiplier: 1.0
+    right_wheel_radius_multiplier: 1.0
+
+    # Odometry config
     odom_frame_id: "odom"
     base_frame_id: "base_link"
-    publish_rate: 50.0          # Hz - tần số publish odom
-    enable_odom_tf: true      # có xuất TF odom -> base_link
+    # Covariance matrix to represent the reliability of Pose/Twist in the message 
+    # 0.001 -> high reliability
+    # 0.01  -> Low reliability 
 
-    # Giới hạn vận tốc (nên đặt để tránh command quá lớn)
+    open_loop: false
+
+    # rule of thumb for Indoor robot, good encoder 
+    #                            x       y      z     roll  pitch   yaw
+    pose_covariance_diagonal : [0.001, 0.001, 0.001, 0.001, 0.001, 0.01]
+    twist_covariance_diagonal: [0.001, 0.001, 0.001, 0.001, 0.001, 0.01]
+
+    publish_rate: 50.0          # Hz - Odom publish frequency
+    enable_odom_tf: true      #  enable transform TF odom -> base_link
+
+    # Preserve turning radius when limiting speed/acceleration/jerk
+    preserve_turning_radius: true
+    publish_wheel_data: true
+
+    # limit the velocities
     linear:
       x:
         has_velocity_limits: true
-        max_velocity: 0.5     # m/s
-        min_velocity: -0.5
+        has_acceleration_limits: true 
+        has_jerk_limits: false
+        max_velocity: 1.0       # m/s
+        min_velocity: -1.0      # m/s
+        max_acceleration: 0.5   # m/s^2  (0 -> 0.8 m/s -> need 1.6s)
+        max_jerk: 0.0
+        min_jerk: 0.0
     angular:
       z:
         has_velocity_limits: true
-        max_velocity: 0.5     # rad/s
-        min_velocity: -0.5
+        has_acceleration_limits: true
+        has_jerk_limits: false
+        max_velocity: 1.0       # rad/s
+        min_velocity: -1.0      # rad/s
+        max_acceleration: 0.8   # rad/s^2
+        min_acceleration: -0.8
+        max_jerk: 0.0
+        min_jerk: 0.0
+        # invert: true
 
-    # Nếu muốn dùng TwistStamped thay vì Twist thường
+
     use_stamped_vel: true
 
 
 SensorBroadcaster:
   ros__parameters:
-    publish_rate: 10.0   # cái này bạn tự thêm nếu muốn
+    publish_rate: 10.0  

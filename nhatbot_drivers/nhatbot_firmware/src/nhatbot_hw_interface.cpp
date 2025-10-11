@@ -108,7 +108,8 @@ namespace nhatbot_interface
         // zlac_driver.setMode(zlac_modbus::ControlMode::SPEED_RPM);
 
         auto& drv_mgr = DriverManager::instance();
-        if (!drv_mgr.init(port_, baudrate_, slave_id_)) {
+        if (!drv_mgr.init(port_, baudrate_, slave_id_)) 
+        {
             RCLCPP_FATAL(rclcpp::get_logger("NhatbotInterface"), "❌ Failed to init Modbus driver");
             return CallbackReturn::FAILURE;
         }
@@ -148,7 +149,6 @@ namespace nhatbot_interface
 
 
 
-
     CallbackReturn NhatbotInterface::on_deactivate(const rclcpp_lifecycle::State &)
 {
     RCLCPP_INFO(rclcpp::get_logger("NhatbotInterface"), "Stopping robot hardware ...");
@@ -171,73 +171,15 @@ namespace nhatbot_interface
     return CallbackReturn::SUCCESS;
 }
 
-
-
-// hardware_interface::return_type NhatbotInterface::read(const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
-// {
-//     if (!zlac_driver.isOpen())
-//     {
-//         RCLCPP_ERROR(rclcpp::get_logger("NhatbotInterface"),
-//                      "❌ ZLAC driver not open!");
-//         return hardware_interface::return_type::ERROR;
-//     }
-
-//     try
-//     {
-//         // --- 1. Đọc vị trí bánh xe (rad) ---
-//         auto [posL, posR] = zlac_driver.get_wheels_travelled();
-//         position_states_[0] = posL;   // rad
-//         position_states_[1] = posR;   // rad
-
-//         // --- 2. Đọc vận tốc góc bánh xe (rad/s) ---
-//         auto [wL, wR] = zlac_driver.get_wheel_angular_velocities();
-//         velocity_states_[0] = wL;     // rad/s
-//         velocity_states_[1] = wR;     // rad/s
-
-//         return hardware_interface::return_type::OK;
-//     }
-//     catch (const std::exception &e)
-//     {
-//         RCLCPP_ERROR_STREAM(rclcpp::get_logger("NhatbotInterface"), "❌ Exception in read(): " << e.what());
-//         return hardware_interface::return_type::ERROR;
-//     }
-// }
-
-
-
-    // hardware_interface::return_type NhatbotInterface::write(const rclcpp::Time &, const rclcpp::Duration &)
-    // {
-    //     if(!zlac_driver.isOpen())
-    //     {
-    //         RCLCPP_ERROR(rclcpp::get_logger("NhatbotInterface"), "❌ Modbus is not connected!");
-    //         return hardware_interface::return_type::ERROR;
-
-    //     }
-    //     int left_rpm = static_cast<int>(velocity_commands_[0] *60.0 / (2.0 * M_PI));  // Convert m/s to RPM
-    //     int right_rpm = static_cast<int>(velocity_commands_[1] * 60 / (2.0 * M_PI));
-
-    //     if (!zlac_driver.setRPM(left_rpm, right_rpm))
-    //     {
-    //         RCLCPP_ERROR(rclcpp::get_logger("NhatbotInterface"), "❌ Failed to set RPM for motors");
-    //         return hardware_interface::return_type::ERROR;
-
-    //     }
-
-
-    // return hardware_interface::return_type::OK;
-    // }
-
-
-    hardware_interface::return_type NhatbotInterface::read(const rclcpp::Time &, const rclcpp::Duration &)
+hardware_interface::return_type NhatbotInterface::read(const rclcpp::Time &, const rclcpp::Duration &)
 {
-    auto& driver = DriverManager::instance().driver();
-
     try {
-        auto [posL, posR] = driver.get_wheels_travelled();
+        // Đọc qua DriverManager
+        auto [posL, posR] = DriverManager::instance().getWheelsTravelled();
         position_states_[0] = posL;
         position_states_[1] = posR;
 
-        auto [wL, wR] = driver.get_wheel_angular_velocities();
+        auto [wL, wR] = DriverManager::instance().getWheelVelocities();
         velocity_states_[0] = wL;
         velocity_states_[1] = wR;
 
@@ -250,20 +192,23 @@ namespace nhatbot_interface
 
 hardware_interface::return_type NhatbotInterface::write(const rclcpp::Time &, const rclcpp::Duration &)
 {
-    auto& driver = DriverManager::instance().driver();
+    try {
+        int left_rpm  = static_cast<int>(velocity_commands_[0] * 60.0 / (2.0 * M_PI));
+        int right_rpm = static_cast<int>(velocity_commands_[1] * 60.0 / (2.0 * M_PI));
+        //std::cout << "left RPM: "<< left_rpm << "right_rpm: " << right_rpm;
 
-    int left_rpm  = static_cast<int>(velocity_commands_[0] * 60.0 / (2.0 * M_PI));
-    int right_rpm = static_cast<int>(velocity_commands_[1] * 60.0 / (2.0 * M_PI));
 
-    if (!driver.setRPM(left_rpm, right_rpm)) {
-        RCLCPP_ERROR(rclcpp::get_logger("NhatbotInterface"), "❌ Failed to set RPM for motors");
+
+        DriverManager::instance().setRPM(left_rpm, right_rpm);
+
+        return hardware_interface::return_type::OK;
+    } 
+    catch (const std::exception& e) 
+    {
+        RCLCPP_ERROR_STREAM(rclcpp::get_logger("NhatbotInterface"), "❌ Exception in write(): " << e.what());
         return hardware_interface::return_type::ERROR;
     }
-
-    return hardware_interface::return_type::OK;
 }
-
-
 
 
 
