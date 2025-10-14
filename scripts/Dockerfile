@@ -22,6 +22,7 @@ RUN apt-get update && apt-get install -y \
     git \
     curl \
     wget \
+    libpcl-dev \
     can-utils libsocketcan2 libsocketcan-dev python3-can \
     build-essential \
     libcanberra-gtk-module \
@@ -31,6 +32,7 @@ RUN apt-get update && apt-get install -y \
     dbus-x11 \
     libmodbus-dev \
     libopencv-dev \
+    ros-humble-pcl-conversions \
     ros-humble-can-msgs \
     ros-humble-rviz2 \
     ros-humble-tf-transformations \
@@ -71,6 +73,7 @@ RUN python3 -m pip install --upgrade pip && \
     Jetson.GPIO \
     transforms3d \
     cantools \
+    iputils-ping \
     websocket-client
 
 RUN echo "source /opt/ros/humble/setup.bash" >> /root/.bashrc

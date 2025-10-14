@@ -1,6 +1,6 @@
 controller_manager:
   ros__parameters:
-    update_rate: 100  # Hz - tần số vòng lặp controller_manager
+    update_rate: 50  # Hz - tần số vòng lặp controller_manager
 
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
@@ -14,7 +14,8 @@ controller_manager:
       
 diff_drive_controller:
   ros__parameters:
-
+    publish_rate: 50.0          # Hz - Odom publish frequency
+    velocity_rolling_window_size: 1
     left_wheel_names: ["wheel_right_joint"] # wheel_left_joint
     right_wheel_names: ["wheel_left_joint"] # wheel_right_joint
 
@@ -31,6 +32,7 @@ diff_drive_controller:
     right_wheel_radius_multiplier: 1.0
 
     # Odometry config
+    cmd_vel_timeout: 0.1
     odom_frame_id: "odom"
     base_frame_id: "base_link"
     # Covariance matrix to represent the reliability of Pose/Twist in the message 
@@ -44,7 +46,7 @@ diff_drive_controller:
     pose_covariance_diagonal : [0.001, 0.001, 0.001, 0.001, 0.001, 0.01]
     twist_covariance_diagonal: [0.001, 0.001, 0.001, 0.001, 0.001, 0.01]
 
-    publish_rate: 50.0          # Hz - Odom publish frequency
+    
     enable_odom_tf: true      #  enable transform TF odom -> base_link
 
     # Preserve turning radius when limiting speed/acceleration/jerk
@@ -55,22 +57,22 @@ diff_drive_controller:
     linear:
       x:
         has_velocity_limits: true
-        has_acceleration_limits: true 
+        has_acceleration_limits: false
         has_jerk_limits: false
-        max_velocity: 1.0       # m/s
-        min_velocity: -1.0      # m/s
-        max_acceleration: 0.5   # m/s^2  (0 -> 0.8 m/s -> need 1.6s)
+        max_velocity: 0.4       # m/s
+        min_velocity: -0.4      # m/s
+        max_acceleration: 0.2   # m/s^2  (0 -> 0.8 m/s -> need 1.6s)
         max_jerk: 0.0
         min_jerk: 0.0
     angular:
       z:
         has_velocity_limits: true
-        has_acceleration_limits: true
+        has_acceleration_limits: false
         has_jerk_limits: false
         max_velocity: 1.0       # rad/s
         min_velocity: -1.0      # rad/s
-        max_acceleration: 0.8   # rad/s^2
-        min_acceleration: -0.8
+        max_acceleration: 0.2   # rad/s^2
+        min_acceleration: -0.2
         max_jerk: 0.0
         min_jerk: 0.0
         # invert: true

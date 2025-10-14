@@ -32,6 +32,7 @@ namespace nhatbot_interface
             hardware_interface::return_type write(const rclcpp::Time &, const rclcpp::Duration &) override;
         
         private:
+            bool modbus_ready_ = false; 
             std::string port_;   
             int baudrate_{115200};
             int slave_id_{1};   
@@ -41,7 +42,8 @@ namespace nhatbot_interface
             std::vector<double> velocity_commands_;
             std::vector<double> position_states_;
             std::vector<double> velocity_states_;
-        //    zlac_modbus::ZLAC8015D_SDK zlac_driver;
+
+            // zlac_modbus::ZLAC8015D_SDK zlac_driver;
 
             
 

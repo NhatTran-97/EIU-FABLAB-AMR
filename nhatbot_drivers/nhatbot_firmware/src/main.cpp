@@ -31,33 +31,20 @@ int main()
     zlac_driver.setAccelTime(1000, 1000);
     zlac_driver.setDecelTime(1000, 1000);
     zlac_driver.setMode(zlac_modbus::ControlMode::SPEED_RPM);
+    zlac_driver.clear_position(zlac_modbus::ClearPos::BOTH);
     bool check = true;
 
     while (true) {
 
-        if (check == true)
-        {
-           
-            if (zlac_driver.clear_position(zlac_modbus::ClearPos::BOTH)) 
-            {
-                std::cout << "Encoders reset thành công (cả 2 bên)" << std::endl;
-            } 
-            else 
-            {
-                std::cerr << "Reset encoder thất bại!" << std::endl;
-            }
-            check = false;
-        }
-
 
         // std::this_thread::sleep_for(std::chrono::seconds(2));
 
-        zlac_driver.setRPM(-10, -60);
+        // zlac_driver.setRPM(70, 70);
 
         auto travelled = zlac_driver.get_wheels_travelled();
         if(!std::isnan(travelled.first) && !std::isnan(travelled.second))
         {
-            std::cout << "Left wheel traveled: " << travelled.first << " m, Right wheel travelled: " << travelled.second << " m" << std::endl;
+            std::cout << "Left wheel traveled: " << travelled.first << " rad, Right wheel travelled: " << travelled.second << " rad" << std::endl;
         }
         else
         {

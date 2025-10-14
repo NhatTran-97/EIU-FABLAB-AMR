@@ -39,11 +39,13 @@ def generate_launch_description():
                                 namespace='/',)
 
 
-    lidar_tf_node =  Node(
-            package='tf2_ros',
-            executable='static_transform_publisher',
-            arguments=['--x', '0.195', '--y', '0.0', '--z', '0.0557', '--yaw', '0', '--pitch', '0', '--roll', '0', '--frame-id', 'base_link', '--child-frame-id', 'laser'],
-            name='lidar_tf_pub') 
+    lidar_tf_node = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        arguments=['0.195', '0.0', '0.0557', '0', '0', '0', 'base_link', 'laser'],
+        name='lidar_tf_pub'
+    )
+
     
     lidar_filter_node = Node(package='laser_filters',
             executable='scan_to_scan_filter_chain',

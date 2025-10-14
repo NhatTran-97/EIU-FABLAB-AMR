@@ -7,6 +7,7 @@ from launch_ros.actions import Node
 from launch.conditions import UnlessCondition, IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource, AnyLaunchDescriptionSource
 from launch.event_handlers import OnProcessExit
+from launch.actions import GroupAction
 
 def generate_launch_description():
 
@@ -62,8 +63,8 @@ def generate_launch_description():
         name="joy_to_twist",
         output="screen",
         parameters=[
-            {"linear_scale": 0.3},        
-            {"angular_scale": 0.3},        
+            {"linear_scale": 0.5},        
+            {"angular_scale": 0.5},        
             {"deadman_button": 9},          
             {"deadzone_threshold": 0.01}  ])
 
@@ -114,18 +115,25 @@ def generate_launch_description():
             name="odom_estimator",
             output="screen",
             emulate_tty=True,
-            parameters=[{"wheel_radius":wheel_radius, "wheel_separation": wheel_separation, "enable_tf_broadcast:": True}])
+            parameters=[{"wheel_radius":wheel_radius, "wheel_separation": wheel_separation, "enable_tf_broadcast": True}])
+
+    load_driver = GroupAction([
+    zlac_driver,
+    velocity_controller_node_cpp,
+    odom_estimator_node
+])
 
 
 
     # Include rosbridge server launch
     rosbridge_launch = IncludeLaunchDescription(AnyLaunchDescriptionSource(os.path.join(rosbridge_pkg, "launch", "rosbridge_websocket_launch.xml")))
 
-    # Call service reset_feedback_position
-    reset_feedback_service = ExecuteProcess(cmd=["ros2", "service", "call", "/SensorBroadcaster/reset_encoder", "std_srvs/srv/Trigger"],output="screen")
 
+    # Call service reset_feedback_position
+    # reset_feedback_service = ExecuteProcess(cmd=["ros2", "service", "call", "/nhatbot/reset_feedback_position", "std_srvs/srv/Trigger"],output="screen") # /nhatbot/reset_feedback_position , /SensorBroadcaster/reset_encoder
+    reset_feedback_service = ExecuteProcess(cmd=["ros2", "service", "call", " /SensorBroadcaster/reset_encoder", "std_srvs/srv/Trigger"],output="screen")
     # Call service reset_odom
-    reset_odom_service = ExecuteProcess(cmd=["ros2", "service", "call", "/reset_odom", "std_srvs/srv/Trigger"], output="screen")
+  #  reset_odom_service = ExecuteProcess(cmd=["ros2", "service", "call", " /SensorBroadcaster/reset_encoder", "std_srvs/srv/Trigger"], output="screen")
 
     # lidar_node = IncludeLaunchDescription(os.path.join(get_package_share_directory("nhatbot_stack"),"launch", "lidar_a1_filter.launch.py"),)
     a_star_node = IncludeLaunchDescription(os.path.join(get_package_share_directory("nhatbot_planner"),"launch", "nhatbot_planner.launch.py"),)
@@ -152,11 +160,7 @@ def generate_launch_description():
                     arguments=['serial', '--dev', '/dev/esp_device',  '-b', '115200']) 
                                             
 
-    static_pub =  Node(
-                package='nhatbot_stack',
-                executable='static_tf_pub_node',
-                output='screen')
-    
+
     rviz_node = Node(
         package="rviz2",
         executable="rviz2",
@@ -181,11 +185,15 @@ def generate_launch_description():
         twist_relay_node,
         joy_to_twist,
         twist_mux_launch,
-        hw_interface_node, 
+        hw_interface_node,   # load_driver,
         reset_feedback_service,
         bno055_launch,
-        static_pub,
+        # static_pub,
         lidar_node,
+
+        localization_node,
+        a_star_node,
+        
 
 
 
@@ -196,13 +204,13 @@ def generate_launch_description():
         # rosbridge_launch,
         
       
-       # localization_node,
-        # a_star_node,
+       
+       
         # usb_cam,
     #    utils_nodes,
     
         # micro_ros_node, 
 
-     #   rviz_node,
+    #    rviz_node,
       
     ])

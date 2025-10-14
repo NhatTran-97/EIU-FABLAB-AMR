@@ -160,7 +160,9 @@ class ZlacInterfaces(Node):
         leftWheel = self.param.set_stop_rpm if abs(leftWheel) < self.param.ignore_small_speed_threshold else leftWheel
         rightWheel = self.param.set_stop_rpm if abs(rightWheel) < self.param.ignore_small_speed_threshold else rightWheel
         try:
-            self.bldcMotor.set_rpm(int(-leftWheel), int(rightWheel))
+            
+            self.bldcMotor.set_rpm(int(leftWheel), int(rightWheel))
+            print("left: ", leftWheel, "right: ", rightWheel)
             self.motor_states = "ACTIVATE"
         except Exception as e:
             self.get_logger().error(f"❌ Error while setting RPM: {str(e)}")

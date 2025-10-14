@@ -35,27 +35,6 @@ std::vector<hardware_interface::StateInterface> NhatbotSensorInterface::export_s
     return state_interfaces;
 }
 
-// hardware_interface::return_type NhatbotSensorInterface::read(const rclcpp::Time &, const rclcpp::Duration &)
-
-// {
-//     auto &driver = DriverManager::instance().driver();
-
-//     try {
-//         battery_voltage_ = driver.get_battery_voltage();
-//         driver_temp_     = driver.get_driver_temperature();
-//         motor_temp_      = driver.get_motor_temperature();
-
-//         auto [fl, fr] = driver.get_motor_faults();
-//         fault_left_  = static_cast<double>(fl);
-//         fault_right_ = static_cast<double>(fr);
-
-//         return hardware_interface::return_type::OK;
-//     } catch (const std::exception &e) {
-//         RCLCPP_ERROR_STREAM(rclcpp::get_logger("NhatbotSensorInterface"),
-//                             "❌ Exception in read(): " << e.what());
-//         return hardware_interface::return_type::ERROR;
-//     }
-// }
 
 hardware_interface::return_type NhatbotSensorInterface::read(const rclcpp::Time &, const rclcpp::Duration &)
 {
@@ -71,7 +50,8 @@ hardware_interface::return_type NhatbotSensorInterface::read(const rclcpp::Time 
         fault_right_ = static_cast<double>(fr);
 
         return hardware_interface::return_type::OK;
-    } catch (const std::exception &e) {
+    } catch (const std::exception &e) 
+    {
         RCLCPP_ERROR_STREAM(rclcpp::get_logger("NhatbotSensorInterface"),
                             "❌ Exception in read(): " << e.what());
         return hardware_interface::return_type::ERROR;

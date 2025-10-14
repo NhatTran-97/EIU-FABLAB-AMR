@@ -146,7 +146,7 @@ class ZLAC8015D_API:
         rpmL, rpmR = self.get_rpm()
         angular_L =  self.rpm_to_radPerSec(rpmL)
         angular_R = self.rpm_to_radPerSec(rpmR)
-        return -angular_L, angular_R
+        return angular_L, -angular_R
         
     
     def rpm_to_linear(self, rpm):
@@ -329,7 +329,7 @@ class ZLAC8015D_API:
         R_rpm = max(min(R_rpm, self.param.max_rpm), -self.param.max_rpm)
 
         left_u16  = self._int16_to_u16(L_rpm)
-        right_u16 = self._int16_to_u16(R_rpm)
+        right_u16 = self._int16_to_u16(-R_rpm)
 
         try:
             self.client.write_registers(modbus_register.L_CMD_RPM, [left_u16, right_u16], unit=self.ID)
@@ -437,7 +437,7 @@ class ZLAC8015D_API:
             # travel_in_one_rev = 2πR  (như bạn đang làm) => công thức dưới OK
             l_travelled = ((float(l_pulse) / float(self.cpr)) * float(self.travel_in_one_rev)) / float(self.R_Wheel)
             r_travelled = ((float(r_pulse) / float(self.cpr)) * float(self.travel_in_one_rev)) / float(self.R_Wheel)
-            return -float(l_travelled), float(r_travelled)
+            return float(l_travelled), -float(r_travelled)
         except Exception as e:
             self.node.get_logger().error(f"❌ Overflow/compute error while calculating wheel position: {e}")
             return None, None

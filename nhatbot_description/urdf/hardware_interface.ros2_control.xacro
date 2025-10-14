@@ -1,10 +1,14 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="mobile_robot">
 
+    <!-- ========================
+    MOTOR INTERFACE (system)
+    ======================== -->
+
     <ros2_control name="RobotSystem" type="system">
         <hardware>
             <plugin>nhatbot_interface/NhatbotInterface</plugin>
-            <param name="port">/dev/ttyUSB1</param>
+            <param name="port">/dev/zlac_8015d</param>
             <param name="baudrate">115200</param>
             <param name="slave_id">1</param>
         </hardware>
@@ -29,6 +33,25 @@
             <state_interface name="velocity" />
         </joint>
     </ros2_control>
+
+    <!-- ==========================
+    SENSOR INTERFACE (sensors)
+    ========================== -->
+
+    <ros2_control name="RobotSensors" type="sensor">
+    <hardware>
+      <plugin>nhatbot_interface/NhatbotSensorInterface</plugin>
+    </hardware>
+
+  #  Export sensor state interfaces
+    <sensor name="nhatbot_sensors">
+      <state_interface name="battery_voltage"/>
+      <state_interface name="driver_temp"/>
+      <state_interface name="motor_temp"/>
+      <state_interface name="fault_left"/>
+      <state_interface name="fault_right"/>
+    </sensor>
+  </ros2_control>
 
 
 </robot>

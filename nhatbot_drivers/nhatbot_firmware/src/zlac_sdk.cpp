@@ -249,9 +249,25 @@ bool ZLAC8015D_SDK::setRPM(int left_rpm, int right_rpm)
 
 
     std::vector<uint16_t> values = {static_cast<uint16_t>(left),  static_cast<uint16_t>(-right)};
+    
 
     return writeRegisters(zlac::L_CMD_RPM, values);
 }
+
+
+
+// void DriverManager::setRPM(double left, double right) {
+//     std::lock_guard<std::mutex> lock(mutex_);
+//     zlac_driver_.setRPM(left, right);
+
+//     if (std::abs(left) < 0.01 && std::abs(right) < 0.01) {
+//         zlac_driver_.disableMotor();   // brake engage
+//     } else {
+//         zlac_driver_.enableMotor();    // ensure release
+//     }
+// }
+
+
 
 
 int32_t ZLAC8015D_SDK::join_u16_to_s32(uint16_t hi, uint16_t lo)
@@ -308,7 +324,7 @@ std::pair<float, float> ZLAC8015D_SDK::get_wheels_travelled()
     {
         int32_t l_pulse = join_u16_to_s32(regs[0], regs[1]);
         int32_t r_pulse = join_u16_to_s32(regs[2], regs[3]);
-        //std::cout << "L: " << l_pulse << "  R: " << r_pulse << std::endl;
+        // std::cout << "tick left: " << l_pulse << "  tick right: " << r_pulse << std::endl;
 
         float l_traveled = (static_cast<float>(l_pulse) / static_cast<float>(cpr_)) * (2.0f * M_PI);  // R_Wheel_
         float r_traveled = (static_cast<float>(r_pulse) / static_cast<float>(cpr_)) * (2.0f * M_PI );
@@ -321,8 +337,7 @@ std::pair<float, float> ZLAC8015D_SDK::get_wheels_travelled()
     catch(const std::exception& e)
     {
         std::cerr << "❌ Overflow/compute error while calculating wheel position: " << e.what() << std::endl;
-        return {std::numeric_limits<float>::quiet_NaN(),
-                std::numeric_limits<float>::quiet_NaN()};
+        return {std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::quiet_NaN()};
     }
 }
 

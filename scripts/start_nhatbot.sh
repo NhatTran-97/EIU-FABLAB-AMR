@@ -26,7 +26,7 @@ fi
 
 # Fixed serial numbers for the devices
 ZLAC_SERIAL="AB0PJ5HV"
-LIDAR_SERIAL="0001"
+# LIDAR_SERIAL="0001"
 
 
 log_info "Scanning for ZLAC device..."
@@ -43,18 +43,18 @@ else
 fi
 
 
-log_info "Scanning for LiDAR device..."
-LIDAR_PORT=$(for dev in /dev/ttyUSB*; do
-    [[ -e "$dev" ]] || continue
-    udevadm info -a -n "$dev" | grep -q "$LIDAR_SERIAL" && echo "$dev" && break
-done)
+# log_info "Scanning for LiDAR device..."
+# LIDAR_PORT=$(for dev in /dev/ttyUSB*; do
+#     [[ -e "$dev" ]] || continue
+#     udevadm info -a -n "$dev" | grep -q "$LIDAR_SERIAL" && echo "$dev" && break
+# done)
 
-if [ -z "$LIDAR_PORT" ]; then
-    log_fail "LiDAR device with serial $LIDAR_SERIAL not found"
-    exit 1
-else
-    log_ok "LiDAR found at $LIDAR_PORT"
-fi
+# if [ -z "$LIDAR_PORT" ]; then
+#     log_fail "LiDAR device with serial $LIDAR_SERIAL not found"
+#     exit 1
+# else
+#     log_ok "LiDAR found at $LIDAR_PORT"
+# fi
 
 log_info "Scanning for Arduino Mega device..."
 ARDUINO_PORT=$(for dev in /dev/ttyACM* /dev/ttyUSB* /dev/arduino_mega; do
@@ -101,7 +101,7 @@ fi
 #     log_ok "ESP device found: alias=$ESP_PORT real=$ESP_HOST_REAL"
 # fi
 
-
+    # --device "$LIDAR_PORT":/dev/rplidar \
 
 
 
@@ -118,7 +118,6 @@ sudo docker run -it \
     --network host \
     --volume /tmp/.X11-unix:/tmp/.X11-unix:rw \
     --device /dev/video0 \
-    --device "$LIDAR_PORT":/dev/rplidar \
     --device "$ZLAC_PORT":/dev/zlac_8015d \
     --device "$ARDUINO_PORT":/dev/arduino_mega \
     --device /dev/bus/usb:/dev/bus/usb \
@@ -131,3 +130,5 @@ sudo docker run -it \
     "$DOCKER_IMAGE" \
     /bin/bash
 log_ok "Docker container has exited cleanly"
+
+
