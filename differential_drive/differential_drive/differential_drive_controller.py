@@ -104,8 +104,10 @@ class Differential_Drive_Controller(Node):
 
     #     wheel_speed_msg.data = [wheel_speed[1,0], wheel_speed[0,0]]
 
-    #     right_wheel = msg.linear.x + ((msg.angular.z * self.wheel_separation_) / 2.);  
-    #     left_wheel = msg.linear.x - ((msg.angular.z * self.wheel_separation_) / 2.); 
+        # right_wheel = msg.linear.x + ((msg.angular.z * self.wheel_separation_) / 2.);  
+        # left_wheel = msg.linear.x - ((msg.angular.z * self.wheel_separation_) / 2.); 
+
+
     #     wheel_speed_msg.data = [left_wheel/self.wheel_radius_, right_wheel/self.wheel_radius_]
         
     #     self.wheel_cmd_pub_.publish(wheel_speed_msg)

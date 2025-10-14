@@ -64,6 +64,7 @@ class OdomEstimator(Node):
 
         # Tính dt (delta thời gian giữa hai lần cập nhật)
         current_time = Time.from_msg(msg.header.stamp)
+        
         dt = max((current_time - self.prev_time_).nanoseconds / 1e9, 1e-6)  # Đảm bảo dt >= 1µs
         self.prev_time_ = current_time
 

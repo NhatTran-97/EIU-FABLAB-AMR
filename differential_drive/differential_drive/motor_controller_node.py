@@ -37,8 +37,11 @@ class MotorController(Node):
             self.get_logger().warn("Received invalid cmd_vel data! Ignoring this update.")
             return
 
-        left_wheel_speed = (msg.linear.x + (msg.angular.z * self.wheel_separation / 2)) / self.wheel_radius
-        right_wheel_speed = (msg.linear.x - (msg.angular.z * self.wheel_separation / 2)) / self.wheel_radius
+        # left_wheel_speed = (msg.linear.x + (msg.angular.z * self.wheel_separation / 2)) / self.wheel_radius
+        # right_wheel_speed = (msg.linear.x - (msg.angular.z * self.wheel_separation / 2)) / self.wheel_radius
+        left_wheel_speed = (msg.linear.x - (msg.angular.z * self.wheel_separation / 2)) / self.wheel_radius
+        right_wheel_speed = (msg.linear.x + (msg.angular.z * self.wheel_separation / 2)) / self.wheel_radius
+
 
         wheel_speed_msg = Float32MultiArray()
         wheel_speed_msg.data = [left_wheel_speed, right_wheel_speed]

@@ -55,7 +55,7 @@ MotorController::MotorController() : Node("motor_controller_node"),  wheel_radiu
     // Build the conversion matrix from wheel angular velocities (phi_r, phi_l) to robot velocities (v, omega)
     speed_conversion_ << 
     wheel_radius_ / 2.0,                  wheel_radius_ / 2.0,
-    wheel_radius_ / wheel_separation_, -wheel_radius_ / wheel_separation_;
+    -wheel_radius_ / wheel_separation_, wheel_radius_ / wheel_separation_;
     
 
     RCLCPP_INFO_STREAM(get_logger(), "The conversion matrix is \n" << speed_conversion_);

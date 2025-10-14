@@ -149,41 +149,73 @@ void OdomEstimator::joint_callback(const sensor_msgs::msg::JointState::SharedPtr
 }
 
 // Update robot pose using wheel angular velocities and differential-drive kinematics
+// void OdomEstimator::update_odometry(double phi_left, double phi_right, double dt)
+// {
+//     // Compute the linear and angular velocity
+//     double linear_velocity = wheel_radius_ * (phi_right + phi_left) / 2.0;
+//     double angular_velocity = wheel_radius_ * (phi_left - phi_right ) / wheel_separation_;
+
+//     // Low-pass filter and angular velocity of the robot
+//     double alpha = 0.2;
+//     linear_filtered_ = alpha * linear_velocity + (1 - alpha) * linear_filtered_;
+//     angular_filtered_ = alpha * angular_velocity + (1 - alpha) * angular_filtered_;
+
+//     // Zero out tiny values to avoid drift
+//     if (std::abs(linear_filtered_) < 0.001)
+//         linear_filtered_ = 0.0;
+//     if (std::abs(angular_filtered_) < 0.001)
+//         angular_filtered_ = 0.0;
+
+//     // // Calculate the position increment
+//     // double d_s = (wheel_radius_ * phi_right * dt + wheel_radius_ * phi_left * dt) / 2.0;
+//     // double d_theta = (wheel_radius_ * phi_right * dt - wheel_radius_ * phi_left * dt) / wheel_separation_;
+
+
+//     // Update robot pose (x, y, theta) using velocities and time delta
+//     x_ += linear_filtered_ * dt * std::cos(theta_);
+//     y_ += linear_filtered_ * dt * std::sin(theta_);
+//     theta_ += angular_filtered_ * dt;
+
+//     // Normalize theta to [-π, π]
+//     theta_ = std::atan2(std::sin(theta_), std::cos(theta_)); 
+
+//     // Publish both odometry and transform
+//     this->publish_odom();
+
+    
+// }
+
+
 void OdomEstimator::update_odometry(double phi_left, double phi_right, double dt)
 {
-    // Compute the linear and angular velocity
-    double linear_velocity = wheel_radius_ * (phi_right + phi_left) / 2.0;
-    double angular_velocity = wheel_radius_ * (phi_left - phi_right ) / wheel_separation_;
+    // Compute linear and angular velocity
+    // ⚠️ Đổi dấu angular_velocity để TF/odom khớp với thực tế robot
+    double linear_velocity  = wheel_radius_ * (phi_right + phi_left) / 2.0;
+    double angular_velocity = wheel_radius_ * (phi_right - phi_left) / wheel_separation_;
 
-    // Low-pass filter and angular velocity of the robot
-    double alpha = 0.2;
-    linear_filtered_ = alpha * linear_velocity + (1 - alpha) * linear_filtered_;
+    // Apply low-pass filter
+    double alpha = 0.2;  // filter factor
+    linear_filtered_  = alpha * linear_velocity  + (1 - alpha) * linear_filtered_;
     angular_filtered_ = alpha * angular_velocity + (1 - alpha) * angular_filtered_;
 
-    // Zero out tiny values to avoid drift
+    // Zero-out tiny velocities to avoid drift
     if (std::abs(linear_filtered_) < 0.001)
         linear_filtered_ = 0.0;
     if (std::abs(angular_filtered_) < 0.001)
         angular_filtered_ = 0.0;
 
-    // // Calculate the position increment
-    // double d_s = (wheel_radius_ * phi_right * dt + wheel_radius_ * phi_left * dt) / 2.0;
-    // double d_theta = (wheel_radius_ * phi_right * dt - wheel_radius_ * phi_left * dt) / wheel_separation_;
-
-
-    // Update robot pose (x, y, theta) using velocities and time delta
-    x_ += linear_filtered_ * dt * std::cos(theta_);
-    y_ += linear_filtered_ * dt * std::sin(theta_);
+    // Update robot pose (x, y, theta)
+    x_     += linear_filtered_ * dt * std::cos(theta_);
+    y_     += linear_filtered_ * dt * std::sin(theta_);
     theta_ += angular_filtered_ * dt;
 
     // Normalize theta to [-π, π]
-    theta_ = std::atan2(std::sin(theta_), std::cos(theta_)); 
+    theta_ = std::atan2(std::sin(theta_), std::cos(theta_));
 
-    // Publish both odometry and transform
+    // Publish odometry and TF
     this->publish_odom();
-
-    
 }
+
 
 // void OdomEstimator::publish_transform()
 // {
