@@ -53,7 +53,7 @@ class PDMotionPlanner(Node):
         # Get the robot's current pose in the odom frame
         try:
             robot_pose_transform = self.tf_buffer.lookup_transform(
-                "odom", "base_footprint", rclpy.time.Time())
+                "odom", "base_link", rclpy.time.Time())
         except Exception as ex:
             self.get_logger().warn(f"Could not transform: {ex}")
             return
@@ -116,12 +116,11 @@ class PDMotionPlanner(Node):
         cmd_vel = Twist()
         cmd_vel.angular.z = max(
             -self.max_angular_velocity,
-            min(self.kp * angular_error + self.kd * angular_error_derivative, self.max_angular_velocity)
-        )
+            min(self.kp * angular_error + self.kd * angular_error_derivative, self.max_angular_velocity))
+        
         cmd_vel.linear.x = max(
             -self.max_linear_velocity,
-            min(self.kp * linear_error + self.kd * linear_error_derivative, self.max_linear_velocity)
-        )
+            min(self.kp * linear_error + self.kd * linear_error_derivative, self.max_linear_velocity))
 
         self.cmd_pub.publish(cmd_vel)
         self.prev_angular_error = angular_error

@@ -211,6 +211,8 @@ class PurePursuit(Node):
         # Publish the MarkerArray
         self.marker_pub.publish(marker_array)
         self.get_logger().info("Published waypoints as markers")
+
+        
     def load_waypoint(self, file_path:str) -> List[Tuple[float, float, float]]:
         goal_poses = []
         if os.path.exists(file_path):

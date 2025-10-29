@@ -7,8 +7,7 @@
 
 namespace nhatbot_controller
 {
-PurePursuit::PurePursuit() : Node("pure_pursuit_motion_planner_node"),
-    look_ahead_distance_(0.1), max_linear_velocity_(0.3), max_angular_velocity_(0.5)
+PurePursuit::PurePursuit() : Node("pure_pursuit_motion_planner_node"), look_ahead_distance_(0.3), max_linear_velocity_(0.5), max_angular_velocity_(0.6)
 {
   tf_buffer_ = std::make_shared<tf2_ros::Buffer>(get_clock());
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
@@ -44,6 +43,7 @@ void PurePursuit::controlLoop()
   geometry_msgs::msg::TransformStamped robot_pose;
   try 
   {
+
     robot_pose = tf_buffer_->lookupTransform("odom", "base_link", tf2::TimePointZero);
   } 
   catch (tf2::TransformException &ex) 
@@ -99,7 +99,7 @@ void PurePursuit::controlLoop()
 // double limit_rad = deg_to_rad(10.0);
 
 // cmd_vel.angular.z = std::clamp(curvature, -limit_rad, limit_rad);
-cmd_vel.linear.x = 0.1;
+  cmd_vel.linear.x = 0.25;
 
 
             
