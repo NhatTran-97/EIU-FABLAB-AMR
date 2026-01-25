@@ -78,6 +78,7 @@ controller_server:
       RotateToGoal.slowing_factor: 5.0
       RotateToGoal.lookahead_time: -1.0
 # local_costmap:
+# local_costmap:
 #   local_costmap:
 #     ros__parameters:
 #       update_frequency: 5.0

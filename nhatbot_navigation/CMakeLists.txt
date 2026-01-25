@@ -7,19 +7,40 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-
-
+find_package(rclcpp REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(nav2_msgs REQUIRED)
+find_package(rclcpp_action REQUIRED)
 
 install(PROGRAMS
 # ${PROJECT_NAME}/cmd_to_drive.py 
 DESTINATION lib/${PROJECT_NAME}
 )
 
+# compute path client executable
+add_executable(compute_path_client src/compute_path_client.cpp)
+ament_target_dependencies(compute_path_client 
+  rclcpp
+  rclcpp_action
+  geometry_msgs
+  nav2_msgs
+)
+target_include_directories(compute_path_client
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>
+)
+
+
+
 
 install(
   DIRECTORY config launch
   DESTINATION share/${PROJECT_NAME}
 )
+
+
+install(TARGETS compute_path_client
+  DESTINATION lib/${PROJECT_NAME})
+
 
 
 if(BUILD_TESTING)

@@ -43,34 +43,21 @@ def generate_launch_description():
     lidar_pkg = get_package_share_directory("ros2_lidar")
 
     # Joy node (joystick driver)
-    joy_node = Node(
-        package="joy",
-        executable="joy_node",
-        name="joystick",
-        parameters=[os.path.join(nhatbot_stack_pkg, "config", "joy_config.yaml")])
+    joy_node = Node(package="joy", executable="joy_node", name="joystick", parameters=[os.path.join(nhatbot_stack_pkg, "config", "joy_config.yaml")])
 
 
-    twist_relay_node = Node(
-        package="nhatbot_twist_teleop",
-        executable="twist_relay",
-        name="twist_relay",
-        parameters=[{"use_sim_time": LaunchConfiguration("use_sim_time")}])
+    twist_relay_node = Node(package="nhatbot_twist_teleop", executable="twist_relay", name="twist_relay", parameters=[{"use_sim_time": LaunchConfiguration("use_sim_time")}])
     
     # Twist Teleop node
-    joy_to_twist = Node(
-        package="nhatbot_twist_teleop",
-        executable="joy_to_twist",
-        name="joy_to_twist",
-        output="screen",
-        parameters=[
-            {"linear_scale": 0.5},        
-            {"angular_scale": 0.5},        
-            {"deadman_button": 9},          
-            {"deadzone_threshold": 0.01}  ])
+    joy_to_twist = Node(package="nhatbot_twist_teleop", executable="joy_to_twist", name="joy_to_twist", output="screen",
+                        parameters=[
+                            {"linear_scale": 0.5},        
+                            {"angular_scale": 0.5},        
+                            {"deadman_button": 9},          
+                            {"deadzone_threshold": 0.01}  ])
 
     # Include twist_mux launch
-    twist_mux_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(twist_mux_pkg, "launch", "twist_mux_launch.py")),
+    twist_mux_launch = IncludeLaunchDescription(PythonLaunchDescriptionSource(os.path.join(twist_mux_pkg, "launch", "twist_mux_launch.py")),
         launch_arguments={"cmd_vel_out": "/nhatbot/cmd_vel_unstamped",
             "config_topics": os.path.join(nhatbot_stack_pkg, "config", "twist_mux_topics.yaml"),
             "config_locks": os.path.join(nhatbot_stack_pkg, "config", "twist_mux_locks.yaml"),
@@ -135,14 +122,16 @@ def generate_launch_description():
     # Call service reset_odom
   #  reset_odom_service = ExecuteProcess(cmd=["ros2", "service", "call", " /SensorBroadcaster/reset_encoder", "std_srvs/srv/Trigger"], output="screen")
 
-    # lidar_node = IncludeLaunchDescription(os.path.join(get_package_share_directory("nhatbot_stack"),"launch", "lidar_a1_filter.launch.py"),)
-    a_star_node = IncludeLaunchDescription(os.path.join(get_package_share_directory("nhatbot_planner"),"launch", "nhatbot_planner.launch.py"),)
+
     localization_node = IncludeLaunchDescription(os.path.join(get_package_share_directory("nhatbot_stack"),"launch", "robot_localization.launch.py"),condition=IfCondition(use_localization))
+
     utils_nodes = IncludeLaunchDescription(os.path.join(nhatbot_stack_pkg,"launch", "utils.launch.py"),)
 
     hw_interface_node = IncludeLaunchDescription(os.path.join(firmware_pkg,"launch", "bringup_hardware_interface.launch.py"),)
 
     lidar_node = IncludeLaunchDescription(os.path.join(lidar_pkg,"launch","ole2dv2_launch.py"),)
+
+    robot_model_node = IncludeLaunchDescription(os.path.join(get_package_share_directory("nhatbot_description"),"launch","display.launch.py"),)
 
     
     usb_cam = Node(
@@ -166,33 +155,26 @@ def generate_launch_description():
         executable="rviz2",
         name="rviz2",
         output="screen",
-        arguments=["-d", os.path.join(nhatbot_stack_pkg, "rviz", "nav2_default_view.rviz")],
+        arguments=["-d", os.path.join(nhatbot_stack_pkg, "rviz", "rviz_visualization.rviz")],
         condition=IfCondition(use_rviz))
 
 
 
     # Return the LaunchDescription
     return LaunchDescription([
-        use_sim_time_arg,
-        use_bno055_arg, 
-        wheel_radius_arg,
-        use_rviz_arg,
-        use_localize_arg, 
-        wheel_separation_arg,
-        use_simple_controller_arg,
-        use_python_arg,
-        joy_node,
-        twist_relay_node,
-        joy_to_twist,
-        twist_mux_launch,
-        hw_interface_node,   # load_driver,
+        use_sim_time_arg, use_bno055_arg, wheel_radius_arg, use_rviz_arg,
+        use_localize_arg, wheel_separation_arg, use_simple_controller_arg, use_python_arg,
+
+        joy_node, twist_relay_node, joy_to_twist, twist_mux_launch,
+        hw_interface_node,  
         reset_feedback_service,
         bno055_launch,
         # static_pub,
         lidar_node,
 
         localization_node,
-        a_star_node,
+        rviz_node,
+        robot_model_node
         
 
 

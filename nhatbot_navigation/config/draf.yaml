@@ -9,7 +9,7 @@ controller_server:
 
     # Important frame corrections
     robot_base_frame: base_link      # ✅ Fix TF error
-    odom_topic: /nhatbot/odom"                    # ✅ Local planner uses odom as global frame
+    odom_topic: /diff_drive_controller/odom                    # ✅ Local planner uses odom as global frame
 
     progress_checker_plugin: "progress_checker"
     goal_checker_plugins: ["general_goal_checker"]

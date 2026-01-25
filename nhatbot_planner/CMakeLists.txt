@@ -82,6 +82,9 @@ ament_target_dependencies(dijkstra_nav2_smoother ${nav2_dependencies})
 target_include_directories(dijkstra_nav2_smoother
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>$<INSTALL_INTERFACE:include>)    
 
+
+
+  
 add_library(a_star_nav2_smoother SHARED  ${A_STAR_SRC_PATH}/a_star_nav2_smoother.cpp)
 ament_target_dependencies(a_star_nav2_smoother ${nav2_dependencies})
 target_include_directories(a_star_nav2_smoother
@@ -93,6 +96,7 @@ pluginlib_export_plugin_description_file(nav2_core global_planner_plugins.xml)
 
 install(TARGETS
   a_star_planner
+  dijkstra_planner
   dijkstra_planner_costmap
   a_star_planner_costmap
   DESTINATION lib/${PROJECT_NAME})

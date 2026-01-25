@@ -108,7 +108,7 @@ nav_msgs::msg::Path DijkstraPlanner::plan(const geometry_msgs::msg::Pose & start
             }
         }
 
-        visited_map_.data.at(poseToCell(active_node)) = 10;  // Blue
+        visited_map_.data.at(poseToCell(active_node)) = 80;  // Blue
         map_pub_->publish(visited_map_);
     }
 

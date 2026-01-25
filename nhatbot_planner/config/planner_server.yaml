@@ -2,7 +2,8 @@ planner_server:
   ros__parameters:
     expected_planner_frequency: 1.0
     use_sim_time: false
-    planner_plugins: ["GridBased", GridBasedFast]
+    # planner_plugins: ["GridBased", GridBasedFast]
+    planner_plugins: ['GridBasedFast']
 
     # Dijkstra Planner parameters
     GridBased:

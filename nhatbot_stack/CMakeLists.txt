@@ -37,7 +37,7 @@ install(TARGETS static_tf_pub_node
 
 
 install(
-  DIRECTORY config launch maps
+  DIRECTORY config launch maps rviz
   DESTINATION share/${PROJECT_NAME}
 )
 

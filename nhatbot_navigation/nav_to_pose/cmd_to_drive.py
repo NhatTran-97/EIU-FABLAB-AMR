@@ -17,7 +17,7 @@ class CmdVelToDrive(Node):
         self.drive_pub = self.create_publisher(
             Twist,
             '/nhatbot_controller/cmd_vel',
-            10
+            10 
         )
 
     def cmd_vel_callback(self, msg):
