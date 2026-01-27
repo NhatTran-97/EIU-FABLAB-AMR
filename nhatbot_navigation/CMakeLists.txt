@@ -11,6 +11,7 @@ find_package(rclcpp REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(nav2_msgs REQUIRED)
 find_package(rclcpp_action REQUIRED)
+find_package(nav_msgs REQUIRED)
 
 install(PROGRAMS
 # ${PROJECT_NAME}/cmd_to_drive.py 
@@ -31,6 +32,17 @@ target_include_directories(compute_path_client
 
 
 
+add_executable(follow_path_client src/follow_path_client.cpp)
+ament_target_dependencies(
+  follow_path_client
+  rclcpp
+  rclcpp_action
+  nav_msgs
+  nav2_msgs
+)
+
+
+
 
 install(
   DIRECTORY config launch
@@ -39,6 +51,7 @@ install(
 
 
 install(TARGETS compute_path_client
+  follow_path_client
   DESTINATION lib/${PROJECT_NAME})
 
 

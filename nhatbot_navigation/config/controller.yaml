@@ -8,8 +8,9 @@ controller_server:
     failure_tolerance: 0.3
 
     # Important frame corrections
-    robot_base_frame: base_link # ✅ Fix TF error
-    odom_topic: /nhatbot/odom # ✅ Local planner uses odom as global frame
+    robot_base_frame: base_link 
+    odom_topic: /diff_drive_controller/odom
+
 
     progress_checker_plugin: "progress_checker"
     goal_checker_plugins: ["general_goal_checker"]
@@ -58,15 +59,23 @@ controller_server:
       short_circuit_trajectory_evaluation: True
       stateful: True
       critics:
-        [
-          "RotateToGoal",
-          "Oscillation",
-          "BaseObstacle",
-          "GoalAlign",
-          "PathAlign",
-          "PathDist",
-          "GoalDist",
-        ]
+        - RotateToGoal
+        - Oscillation
+        - BaseObstacle
+        - GoalAlign
+        - PathAlign
+        - PathDist
+        - GoalDist
+      # critics:
+      #   [
+      #     "RotateToGoal",
+      #     "Oscillation",
+      #     "BaseObstacle",
+      #     "GoalAlign",
+      #     "PathAlign",
+      #     "PathDist",
+      #     "GoalDist",
+      #   ]
       BaseObstacle.scale: 0.02
       PathAlign.scale: 32.0
       PathAlign.forward_point_distance: 0.1

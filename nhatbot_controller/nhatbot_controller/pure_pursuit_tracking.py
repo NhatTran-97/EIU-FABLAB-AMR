@@ -27,7 +27,7 @@ class PurePursuit(Node):
         self.max_angular_velocity = self.get_parameter("max_angular_velocity").value
 
         # Subscribers and publishers
-        self.path_sub = self.create_subscription(Path, "/a_star/path", self.path_callback, 10)
+        self.path_sub = self.create_subscription(Path, "/plan", self.path_callback, 10)
         self.cmd_pub = self.create_publisher(Twist, "/cmd_vel", 10)
         self.carrot_pose_pub = self.create_publisher(PoseStamped, "/pure_pursuit/carrot", 10)
 

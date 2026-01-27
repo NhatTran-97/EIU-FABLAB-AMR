@@ -20,7 +20,7 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_motion_planner_node"), look_ahea
   max_angular_velocity_ = get_parameter("max_angular_velocity").as_double();
 
   path_sub_ = create_subscription<nav_msgs::msg::Path>(
-    "/a_star/path", 10, std::bind(&PurePursuit::pathCallback, this, std::placeholders::_1));
+    "/plan", 10, std::bind(&PurePursuit::pathCallback, this, std::placeholders::_1));
         
   cmd_pub_ = create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
 

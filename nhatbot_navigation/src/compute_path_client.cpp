@@ -86,7 +86,7 @@ void ComputePathClient::goalCallback(
 
     ComputePathToPose::Goal goal;
     goal.goal = *msg;
-    goal.planner_id = "GridBasedFast";
+    goal.planner_id = "GridBased_nav2";
 
     auto options =
         rclcpp_action::Client<ComputePathToPose>::SendGoalOptions();

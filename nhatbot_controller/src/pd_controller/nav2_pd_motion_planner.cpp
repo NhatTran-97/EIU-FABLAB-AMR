@@ -58,9 +58,9 @@ void PDMotionPlanner::deactivate()
 }
 
 geometry_msgs::msg::TwistStamped PDMotionPlanner::computeVelocityCommands(
-                                                                            const geometry_msgs::msg::PoseStamped & robot_pose,
-                                                                            const geometry_msgs::msg::Twist &,
-                                                                            nav2_core::GoalChecker *)
+                                                                          const geometry_msgs::msg::PoseStamped & robot_pose,
+                                                                          const geometry_msgs::msg::Twist &,
+                                                                          nav2_core::GoalChecker *)
 {
   auto node = node_.lock();
   geometry_msgs::msg::TwistStamped cmd_vel;

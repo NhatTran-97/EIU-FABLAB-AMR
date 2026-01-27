@@ -65,67 +65,9 @@ def generate_launch_description():
             "use_sim_time":  LaunchConfiguration("use_sim_time")}.items())
     
     bno055_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(bno055_pkg, "launch", "bno055.launch.py")),
-        condition=IfCondition(use_bno055))
+        PythonLaunchDescriptionSource(os.path.join(bno055_pkg, "launch", "bno055.launch.py")),condition=IfCondition(use_bno055))
 
-    # ZLAC8015D driver
-    zlac_driver = Node(
-        package="zlac8015d_driver",
-        executable="zlac_interface_node.py",
-        name="zlac_driver_node",
-        output="screen")
-    
-
-    velocity_controller_node_py = Node(
-        package="differential_drive",
-        executable="differential_drive_controller.py",
-        arguments=[{"wheel_radius": wheel_radius,
-                    "wheel_separation": wheel_separation,}],
-        condition=IfCondition(use_python))
-
-
-    velocity_controller_node_cpp =  Node(
-            package="differential_drive",
-            executable="motor_controller_node",
-            name="motor_controller",
-            output="screen",
-            parameters=[{
-                "wheel_radius": wheel_radius,
-                "wheel_separation": wheel_separation,
-                "linear_velocity_max_": 0.5,
-                "angular_velocity_max_": 0.5}],
-                condition=UnlessCondition(use_python))
-    
-    odom_estimator_node = Node(
-            package="differential_drive",
-            executable="odom_estimator_node",
-            name="odom_estimator",
-            output="screen",
-            emulate_tty=True,
-            parameters=[{"wheel_radius":wheel_radius, "wheel_separation": wheel_separation, "enable_tf_broadcast": True}])
-
-    load_driver = GroupAction([
-    zlac_driver,
-    velocity_controller_node_cpp,
-    odom_estimator_node
-])
-
-
-
-    # Include rosbridge server launch
-    rosbridge_launch = IncludeLaunchDescription(AnyLaunchDescriptionSource(os.path.join(rosbridge_pkg, "launch", "rosbridge_websocket_launch.xml")))
-
-
-    # Call service reset_feedback_position
-    # reset_feedback_service = ExecuteProcess(cmd=["ros2", "service", "call", "/nhatbot/reset_feedback_position", "std_srvs/srv/Trigger"],output="screen") # /nhatbot/reset_feedback_position , /SensorBroadcaster/reset_encoder
     reset_feedback_service = ExecuteProcess(cmd=["ros2", "service", "call", " /SensorBroadcaster/reset_encoder", "std_srvs/srv/Trigger"],output="screen")
-    # Call service reset_odom
-  #  reset_odom_service = ExecuteProcess(cmd=["ros2", "service", "call", " /SensorBroadcaster/reset_encoder", "std_srvs/srv/Trigger"], output="screen")
-
-
-    localization_node = IncludeLaunchDescription(os.path.join(get_package_share_directory("nhatbot_stack"),"launch", "robot_localization.launch.py"),condition=IfCondition(use_localization))
-
-    utils_nodes = IncludeLaunchDescription(os.path.join(nhatbot_stack_pkg,"launch", "utils.launch.py"),)
 
     hw_interface_node = IncludeLaunchDescription(os.path.join(firmware_pkg,"launch", "bringup_hardware_interface.launch.py"),)
 
@@ -133,22 +75,7 @@ def generate_launch_description():
 
     robot_model_node = IncludeLaunchDescription(os.path.join(get_package_share_directory("nhatbot_description"),"launch","display.launch.py"),)
 
-    
-    usb_cam = Node(
-            package='usb_cam',
-            executable='usb_cam_node_exe',
-            name='usb_cam',
-            parameters=[os.path.join(nhatbot_stack_pkg, "config", "usb_params.yaml")])
-
-
-    micro_ros_node =   Node(
-                    package='micro_ros_agent',
-                    executable='micro_ros_agent',
-                    name='micro_ros_serial_agent',
-                    output='screen',
-                    arguments=['serial', '--dev', '/dev/esp_device',  '-b', '115200']) 
-                                            
-
+    mapping_node = IncludeLaunchDescription(os.path.join(get_package_share_directory("nhatbot_stack"),"launch","online_async.launch.launch.py"),)
 
     rviz_node = Node(
         package="rviz2",
@@ -168,31 +95,13 @@ def generate_launch_description():
         joy_node, twist_relay_node, joy_to_twist, twist_mux_launch,
         hw_interface_node,  
         reset_feedback_service,
-        # bno055_launch,
+        bno055_launch,
         # static_pub,
         lidar_node,
-
-        localization_node,
-        # rviz_node,
-        # robot_model_node,
+        rviz_node,
+        robot_model_node,
+     
         
 
-
-
-
-        #velocity_controller_node_py,
-        #velocity_controller_node_cpp,
-        #odom_estimator_node,
-        # rosbridge_launch,
-        
-      
-       
-       
-        # usb_cam,
-    #    utils_nodes,
-    
-        # micro_ros_node, 
-
-       rviz_node,
       
     ])

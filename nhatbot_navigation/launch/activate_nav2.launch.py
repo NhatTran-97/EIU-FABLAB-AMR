@@ -10,13 +10,13 @@ def generate_launch_description():
 
     use_sim_time = LaunchConfiguration("use_sim_time")
  
-    lifecycle_nodes = [  "smoother_server", "planner_server", "costmap/costmap" ]
+    lifecycle_nodes = ["smoother_server", "planner_server", "controller_server"]   # 
 
     
 
     use_sim_time_arg = DeclareLaunchArgument("use_sim_time", default_value="false",)
 
-    global_costmap =Node(
+    compute_path_node =Node(
         package='nhatbot_navigation',
         executable='compute_path_client',
         name='compute_path_client',
@@ -81,9 +81,12 @@ def generate_launch_description():
     return LaunchDescription([
         use_sim_time_arg,
         nav2_planner_server,
+        compute_path_node,
         nav2_smoother_server,
-        global_costmap,
-        nav2_lifecycle_manager
+        # global_costmap,
+        controller_server,
+        nav2_lifecycle_manager,
+        
 
 
     ])

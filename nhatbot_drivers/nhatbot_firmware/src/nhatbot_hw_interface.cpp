@@ -238,7 +238,7 @@ hardware_interface::return_type NhatbotInterface::write(const rclcpp::Time &, co
     try {
         int left_rpm  = static_cast<int>(velocity_commands_[0] * 60.0 / (2.0 * M_PI));
         int right_rpm = static_cast<int>(velocity_commands_[1] * 60.0 / (2.0 * M_PI));
-         RCLCPP_INFO(rclcpp::get_logger("NhatbotInterface"),"CMD L=%d  R=%d", left_rpm, right_rpm);
+         //RCLCPP_INFO(rclcpp::get_logger("NhatbotInterface"),"CMD L=%d  R=%d", left_rpm, right_rpm);
 
         /*For Driver manager*/
         DriverManager::instance().setRPM(left_rpm, right_rpm);

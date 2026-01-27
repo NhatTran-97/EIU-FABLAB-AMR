@@ -103,7 +103,7 @@ install(PROGRAMS
 
 
 install(
-  DIRECTORY  waypoints 
+  DIRECTORY  waypoints config
   DESTINATION share/${PROJECT_NAME}
 )
 
