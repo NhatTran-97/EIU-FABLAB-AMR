@@ -7,14 +7,15 @@ controller_server:
     min_y_velocity_threshold: 0.001 
     min_theta_velocity_threshold: 0.001 #(rad/s)
     failure_tolerance: 0.3
-    odom_topic: "/diff_drive_controller/odom"
+    odom_topic: "/nhatbot/odom"     # /nhatbot/odom   /diff_drive_controller/odom
+
     odom_duration: 0.3
 
 
-    # controller_plugins: ["FollowPath_PD", "FollowPath_PurePursuit","FollowPath_DWA", "FollowPath_RPurePursuit"]
+    controller_plugins: ["FollowPath_PD", "FollowPath_PurePursuit","FollowPath_DWB", "FollowPath_RPurePursuit", "Window_Dynamic_PurePursuit"]
 
-    controller_plugins: ["FollowPath_DWA"]
-    # default_controller: "FollowPath"
+    # controller_plugins: ["FollowPath_DWA", "Window_Dynamic_PurePursuit"]
+
     goal_checker_plugins: ["general_goal_checker"] # Supervising controller doesn't fail and is not blocked, guarantee that the robot is making progress
     progress_checker_plugins: ["progress_checker"]
 
@@ -26,31 +27,31 @@ controller_server:
     general_goal_checker:
       stateful: true
       plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.1
-      yaw_goal_tolerance: 0.1
+      xy_goal_tolerance: 0.25
+      yaw_goal_tolerance: 0.25
 
 
 
 
-    # FollowPath_PD:
-    #   plugin: "nhatbot_controller::PDMotionPlanner"
-    #   kp: 2.0
-    #   kd: 0.1
-    #   max_linear_velocity: 0.3
-    #   max_angular_velocity: 0.8
-    #   step_size: 0.2
+    FollowPath_PD:
+      plugin: "nhatbot_controller::PDMotionPlanner"
+      kp: 2.0
+      kd: 0.1
+      max_linear_velocity: 0.3
+      max_angular_velocity: 0.8
+      step_size: 0.2
 
-    # FollowPath_PurePursuit:
-    #   plugin: "nhatbot_controller::PurePursuit"
-    #   look_ahead_distance: 0.9
-    #   max_linear_velocity: 0.5
-    #   max_angular_velocity: 0.5
+    FollowPath_PurePursuit:
+      plugin: "nhatbot_controller::PurePursuit"
+      look_ahead_distance: 0.9
+      max_linear_velocity: 0.5
+      max_angular_velocity: 0.5
 
-    #   curvature_gain: 2.0
-    #   slow_down_distance: 0.8
-    #   cost_scaling_factor: 1.0
+      curvature_gain: 2.0
+      slow_down_distance: 0.8
+      cost_scaling_factor: 1.0
 
-    FollowPath_DWA:
+    FollowPath_DWB:
       plugin: "nav2_rotation_shim_controller::RotationShimController"
       primary_controller: "dwb_core::DWBLocalPlanner"
 
@@ -106,52 +107,52 @@ controller_server:
       RotateToGoal.slowing_factor: 5.0
       RotateToGoal.lookahead_time: -1.0
    
+    Window_Dynamic_PurePursuit:
+      plugin: "nav2_rotation_shim_controller::RotationShimController"
+      primary_controller: "nav2_dynamic_window_pure_pursuit_controller::DynamicWindowPurePursuitController" # change here to use DWPP plugin
 
-    # DWB:
-    #   plugin: "dwb_core::DWBLocalPlanner"
-    #   debug_trajectory_details: True
-    #   min_vel_x: 0.0
-    #   min_vel_y: 0.0
-    #   max_vel_x: 0.5   #old:0.5
-    #   max_vel_y: 0.0
-    #   max_vel_theta: 1.0  #old:0.5
-    #   min_speed_xy: 0.0
-    #   max_speed_xy: 0.5
-    #   min_speed_theta: 0.0
-    #   acc_lim_x: 2.5
-    #   acc_lim_y: 0.0
-    #   acc_lim_theta: 3.2
-    #   decel_lim_x: -2.5
-    #   decel_lim_y: 0.0
-    #   decel_lim_theta: -3.2
-    #   vx_samples: 50
-    #   vy_samples: 5
-    #   vtheta_samples: 20
-    #   sim_time: 1.5
-    #   linear_granularity: 0.05
-    #   angular_granularity: 0.025
-    #   transform_tolerance: 0.2
-    #   xy_goal_tolerance: 0.05
-    #   trans_stopped_velocity: 0.25
-    #   short_circuit_trajectory_evaluation: True
-    #   stateful: True
-    #   critics:
-    #     ["RotateToGoal", "Oscillation", "BaseObstacle",
-    #     "GoalAlign", "PathAlign", "PathDist", "GoalDist"]
+          # ---- Rotation Shim params ----
+      angular_dist_threshold: 0.785
+      forward_sampling_distance: 0.5
+      angular_disengage_threshold: 0.3925
+      rotate_to_heading_angular_vel: 1.8
+      max_angular_accel: 3.2
+      simulate_ahead_time: 1.0
+      rotate_to_goal_heading: false
 
-    #   BaseObstacle.scale: 0.02
-    #   PathAlign.scale: 32.0
-    #   PathAlign.forward_point_distance: 0.1
-    #   GoalAlign.scale: 24.0
-    #   GoalAlign.forward_point_distance: 0.1
-    #   PathDist.scale: 32.0
-    #   GoalDist.scale: 24.0
-    #   RotateToGoal.scale: 32.0
-    #   RotateToGoal.slowing_factor: 5.0
-    #   RotateToGoal.lookahead_time: -1.0
 
+      max_linear_vel: 0.4 # DWPP parameter
+      min_linear_vel: 0.0 # DWPP parameter
+      max_angular_vel: 1.0 # DWPP parameter
+      min_angular_vel: -1.0 # DWPP parameter
+      max_linear_accel: 0.5 # DWPP parameter
+      max_linear_decel: -0.5 # DWPP parameter
+      # max_angular_accel: 1.0 # DWPP parameter
+      max_angular_decel: -1.0 # DWPP parameter
+      lookahead_dist: 0.6
+      min_lookahead_dist: 0.3
+      max_lookahead_dist: 0.9
+      lookahead_time: 1.5
+      transform_tolerance: 0.1
+      use_velocity_scaled_lookahead_dist: true # use adaptive pure pursuit
+      min_approach_linear_velocity: 0.05
+      approach_velocity_scaling_dist: 0.6
+      max_allowed_time_to_collision_up_to_carrot: 1.0
+      use_collision_detection: true
+      use_regulated_linear_velocity_scaling: true # use regulated pure pursuit
+      use_cost_regulated_linear_velocity_scaling: true # use regulated pure pursuit
+      cost_scaling_dist: 0.6
+      cost_scaling_gain: 1.0
+      inflation_cost_scaling_factor: 3.0
+      regulated_linear_scaling_min_radius: 0.9
+      regulated_linear_scaling_min_speed: 0.25
+      use_rotate_to_heading: true
+      rotate_to_heading_min_angle: 3.14 # OFF since DWPP can handle steep curvature
+      allow_reversing: false
+      use_interpolation: true
 
     FollowPath_RPurePursuit:
+      
       plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
       max_linear_vel: 0.5
       min_linear_vel: -0.5

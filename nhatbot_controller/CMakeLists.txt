@@ -20,7 +20,8 @@ find_package(nav2_costmap_2d REQUIRED)
 find_package(nav2_util REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(nav2_msgs REQUIRED)
-
+find_package(nav2_regulated_pure_pursuit_controller REQUIRED)
+find_package(angles REQUIRED)
 
 set(PURE_PURSUIT_SRC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/src/purePursuit_controller")
 set(PD_SRC_PATH "${CMAKE_CURRENT_SOURCE_DIR}/src/pd_controller")
@@ -43,6 +44,8 @@ set(nav2_dependencies
   geometry_msgs
   tf2
   tf2_ros
+  nav2_regulated_pure_pursuit_controller
+  angles
   tf2_geometry_msgs
   nav2_core
   nav2_costmap_2d
@@ -77,15 +80,25 @@ ament_target_dependencies(nav2_pure_pursuit_motion_planner ${nav2_dependencies})
 target_include_directories(nav2_pure_pursuit_motion_planner PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>$<INSTALL_INTERFACE:include>)    
 
 
+add_library(nav2_dynamic_window_pure_pursuit_controller SHARED src/nav2_dynamic_window_pure_pursuit_controller.cpp)
+ament_target_dependencies(nav2_dynamic_window_pure_pursuit_controller ${nav2_dependencies})
+target_include_directories(nav2_dynamic_window_pure_pursuit_controller
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include> $<INSTALL_INTERFACE:include>
+)
+
+
+
 install(TARGETS
   pure_pursuit
   pd_motion_planner
+  
   DESTINATION lib/${PROJECT_NAME}
 )
 
 install(TARGETS
   nav2_pd_motion_planner
   nav2_pure_pursuit_motion_planner
+  nav2_dynamic_window_pure_pursuit_controller
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME})
@@ -123,5 +136,5 @@ endif()
 ament_export_include_directories(include)
 
 ament_export_dependencies(${nav2_dependencies})
-ament_export_libraries(pd_nav2_motion_planner pure_pursuit_nav2_motion_planner)
+ament_export_libraries(pd_nav2_motion_planner pure_pursuit_nav2_motion_planner dynamic_window_pure_pursuit_nav2_controller)
 ament_package()
