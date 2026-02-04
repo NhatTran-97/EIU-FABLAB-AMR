@@ -45,8 +45,10 @@ private:
     FollowPath::Goal goal;
     goal.path = *path;
 
-    //  ["FollowPath_PD", "FollowPath_PurePursuit","FollowPath_DWA", "FollowPath_RPurePursuit"]
-    goal.controller_id = "FollowPath_DWA";  
+    /*
+      ["FollowPath_PDMotionPlanner", "FollowPath_PurePursuit","FollowPath_DWB", "FollowPath_RegulatedPurePursuit", "FollowPath_WindowDynamicPurePursuit"]
+    */
+    goal.controller_id = "FollowPath_DWB";  
     goal.goal_checker_id = "general_goal_checker";
 
     

@@ -1,0 +1,7 @@
+{
+  "motion_model": "diff_drive",
+  "grid_resolution": 0.05,
+  "num_of_headings": 16,
+  "allow_reverse": false,
+  "trajectory_distinctness_ratio": 0.90
+}

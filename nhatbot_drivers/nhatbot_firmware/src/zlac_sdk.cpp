@@ -113,19 +113,7 @@ bool ZLAC8015D_SDK::autoReconnect(int retry_interval_ms)
     }
 }
 
-// bool ZLAC8015D_SDK::healthCheck()
-// {
-//     if (!ctx_) return false;
 
-//     uint16_t reg;
-//     int rc = modbus_read_registers(ctx_.get(), 0x0000, 1, &reg); // thử đọc 1 thanh ghi
-//     if (rc == -1) {
-//         std::cerr << "⚠️ Lost connection: " << modbus_strerror(errno) << "\n";
-//         closeDriver();
-//         return false;
-//     }
-//     return true;
-// }
 
 bool ZLAC8015D_SDK::healthCheck()
 {
@@ -198,7 +186,7 @@ bool  ZLAC8015D_SDK::setDecelTime(int left_ms, int right_ms)
 {
 
     std::vector<uint16_t> values = {static_cast<uint16_t>(left_ms),static_cast<uint16_t>(right_ms)};
-    return writeRegisters(zlac::R_ACL_TIME, values);
+    return writeRegisters(zlac::L_DCL_TIME, values);
 }
 
 bool ZLAC8015D_SDK::setAccelTime(int left_ms, int right_ms)

@@ -6,23 +6,19 @@ controller_server:
     min_x_velocity_threshold: 0.001
     min_y_velocity_threshold: 0.001 
     min_theta_velocity_threshold: 0.001 #(rad/s)
-    failure_tolerance: 0.3
-    odom_topic: "/nhatbot/odom"     # /nhatbot/odom   /diff_drive_controller/odom
+    failure_tolerance: 0.3 #(m)
+    odom_topic: "/diff_drive_controller/odom" 
+    odom_duration: 0.3 # if in the range 0.3s, not update new odom --> abort/ stop
+    controller_plugins: ["FollowPath_PDMotionPlanner", "FollowPath_PurePursuit","FollowPath_DWB", "FollowPath_RegulatedPurePursuit", "FollowPath_WindowDynamicPurePursuit"]
+ 
 
-    odom_duration: 0.3
-
-
-    controller_plugins: ["FollowPath_PD", "FollowPath_PurePursuit","FollowPath_DWB", "FollowPath_RPurePursuit", "Window_Dynamic_PurePursuit"]
-
-    # controller_plugins: ["FollowPath_DWA", "Window_Dynamic_PurePursuit"]
-
-    goal_checker_plugins: ["general_goal_checker"] # Supervising controller doesn't fail and is not blocked, guarantee that the robot is making progress
+    goal_checker_plugins: ["general_goal_checker"] 
     progress_checker_plugins: ["progress_checker"]
 
-    progress_checker:
+    progress_checker: # In 10s, robot just moved >= 5cm
       plugin: "nav2_controller::SimpleProgressChecker"
-      required_movement_radius: 0.2
-      movement_time_allowance: 5.0
+      required_movement_radius: 0.05   # 0.05m = 5cm
+      movement_time_allowance: 10.0  # After 10s, if robot not move --> Stop robot
 
     general_goal_checker:
       stateful: true
@@ -31,10 +27,29 @@ controller_server:
       yaw_goal_tolerance: 0.25
 
 
+    # FollowPath_PDMotionPlanner:
+    #   plugin: "nhatbot_controller::PDMotionPlanner"
+    #   kp: 2.0
+    #   kd: 0.1
+    #   max_linear_velocity: 0.3
+    #   max_angular_velocity: 0.8
+    #   step_size: 0.2
 
+    # FollowPath_PurePursuit:
+    #   plugin: "nhatbot_controller::PurePursuit"
+    #   look_ahead_distance: 0.9
+    #   max_linear_velocity: 0.5
+    #   max_angular_velocity: 0.5
 
-    FollowPath_PD:
-      plugin: "nhatbot_controller::PDMotionPlanner"
+    #   curvature_gain: 2.0
+    #   slow_down_distance: 0.8
+    #   cost_scaling_factor: 1.0
+
+    FollowPath_PDMotionPlanner:
+      plugin: "nav2_rotation_shim_controller::RotationShimController"
+      primary_controller: "nhatbot_controller::PDMotionPlanner"
+
+      # ---- Primary controller (PD) ----
       kp: 2.0
       kd: 0.1
       max_linear_velocity: 0.3
@@ -42,11 +57,22 @@ controller_server:
       step_size: 0.2
 
     FollowPath_PurePursuit:
-      plugin: "nhatbot_controller::PurePursuit"
+      plugin: "nav2_rotation_shim_controller::RotationShimController"
+      primary_controller: "nhatbot_controller::PurePursuit"
+
+      # ---- Rotation Shim params ----
+      angular_dist_threshold: 0.785
+      forward_sampling_distance: 0.5
+      angular_disengage_threshold: 0.3925
+      rotate_to_heading_angular_vel: 1.8
+      max_angular_accel: 3.2
+      simulate_ahead_time: 1.0
+      rotate_to_goal_heading: false
+
+      # ---- Primary controller (PP) ----
       look_ahead_distance: 0.9
       max_linear_velocity: 0.5
       max_angular_velocity: 0.5
-
       curvature_gain: 2.0
       slow_down_distance: 0.8
       cost_scaling_factor: 1.0
@@ -65,7 +91,6 @@ controller_server:
       rotate_to_goal_heading: false
 
       # ---- Primary controller (DWB) ----
-      # primary_controller: "DWB"
       debug_trajectory_details: True
       min_vel_x: 0.0
       min_vel_y: 0.0
@@ -82,36 +107,41 @@ controller_server:
       decel_lim_y: 0.0
       decel_lim_theta: -3.2
       vx_samples: 50
-      vy_samples: 5
+      vy_samples: 0
       vtheta_samples: 20
-      sim_time: 1.5
+      simulation_time: 2.5
       linear_granularity: 0.05
       angular_granularity: 0.025
       transform_tolerance: 0.2
       xy_goal_tolerance: 0.05
-      trans_stopped_velocity: 0.25
+      trans_stopped_velocity: 0.05 #0.25
       short_circuit_trajectory_evaluation: True
       stateful: True
       critics:
         ["RotateToGoal", "Oscillation", "BaseObstacle",
-        "GoalAlign", "PathAlign", "PathDist", "GoalDist"]
+        "GoalAlign", "PathAlign", "PathDist", "GoalDist" ,"ObstacleFootprint"]
+      # critics:
+      #   ["RotateToGoal", "Oscillation", "BaseObstacle",
+      #    "PathDist", "GoalDist" ,"ObstacleFootprint"]
 
       BaseObstacle.scale: 0.02
+      # ObstacleFootprint.scale: 0.015
       PathAlign.scale: 32.0
       PathAlign.forward_point_distance: 0.1
       GoalAlign.scale: 24.0
       GoalAlign.forward_point_distance: 0.1
+      Oscillation.scale: 1.0
       PathDist.scale: 32.0
       GoalDist.scale: 24.0
       RotateToGoal.scale: 32.0
       RotateToGoal.slowing_factor: 5.0
       RotateToGoal.lookahead_time: -1.0
    
-    Window_Dynamic_PurePursuit:
+    FollowPath_WindowDynamicPurePursuit:
       plugin: "nav2_rotation_shim_controller::RotationShimController"
       primary_controller: "nav2_dynamic_window_pure_pursuit_controller::DynamicWindowPurePursuitController" # change here to use DWPP plugin
 
-          # ---- Rotation Shim params ----
+      # ---- Rotation Shim params ----
       angular_dist_threshold: 0.785
       forward_sampling_distance: 0.5
       angular_disengage_threshold: 0.3925
@@ -120,7 +150,7 @@ controller_server:
       simulate_ahead_time: 1.0
       rotate_to_goal_heading: false
 
-
+      # ---- Primary controller (DWPP) ----
       max_linear_vel: 0.4 # DWPP parameter
       min_linear_vel: 0.0 # DWPP parameter
       max_angular_vel: 1.0 # DWPP parameter
@@ -151,7 +181,7 @@ controller_server:
       allow_reversing: false
       use_interpolation: true
 
-    FollowPath_RPurePursuit:
+    FollowPath_RegulatedPurePursuit:
       
       plugin: "nav2_regulated_pure_pursuit_controller::RegulatedPurePursuitController"
       max_linear_vel: 0.5
@@ -199,8 +229,8 @@ local_costmap:
       resolution: 0.05
       always_send_full_costmap: True
       rolling_window: true
-      width: 5
-      height: 5
+      width: 4
+      height: 4
 
       plugins: ["obstacle_layer", "voxel_layer", "inflation_layer"]
 
@@ -222,8 +252,8 @@ local_costmap:
 
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
-        cost_scaling_factor: 3.0
-        inflation_radius: 0.52 # At least >= robot_radius (55cm)
+        cost_scaling_factor: 2.0     # ↓ cost mượt hơn  
+        inflation_radius: 0.6 # At least >= robot_radius (55cm)   # ↑ né xa hơn
 
 
       voxel_layer:
