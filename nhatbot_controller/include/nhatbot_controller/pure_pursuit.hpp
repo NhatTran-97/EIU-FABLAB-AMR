@@ -30,6 +30,9 @@ private:
     double look_ahead_distance_;
     double max_linear_velocity_;
     double max_angular_velocity_;
+    double min_look_ahead_distance_; 
+    double min_linear_velocity_; 
+    double curvature_gain_;
 
     nav_msgs::msg::Path global_plan_;
 

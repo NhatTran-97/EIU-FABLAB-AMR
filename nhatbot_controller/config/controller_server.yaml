@@ -27,24 +27,6 @@ controller_server:
       yaw_goal_tolerance: 0.25
 
 
-    # FollowPath_PDMotionPlanner:
-    #   plugin: "nhatbot_controller::PDMotionPlanner"
-    #   kp: 2.0
-    #   kd: 0.1
-    #   max_linear_velocity: 0.3
-    #   max_angular_velocity: 0.8
-    #   step_size: 0.2
-
-    # FollowPath_PurePursuit:
-    #   plugin: "nhatbot_controller::PurePursuit"
-    #   look_ahead_distance: 0.9
-    #   max_linear_velocity: 0.5
-    #   max_angular_velocity: 0.5
-
-    #   curvature_gain: 2.0
-    #   slow_down_distance: 0.8
-    #   cost_scaling_factor: 1.0
-
     FollowPath_PDMotionPlanner:
       plugin: "nav2_rotation_shim_controller::RotationShimController"
       primary_controller: "nhatbot_controller::PDMotionPlanner"
@@ -114,28 +96,28 @@ controller_server:
       angular_granularity: 0.025
       transform_tolerance: 0.2
       xy_goal_tolerance: 0.05
-      trans_stopped_velocity: 0.05 #0.25
+      trans_stopped_velocity: 0.25 #0.25
       short_circuit_trajectory_evaluation: True
       stateful: True
       critics:
         ["RotateToGoal", "Oscillation", "BaseObstacle",
-        "GoalAlign", "PathAlign", "PathDist", "GoalDist" ,"ObstacleFootprint"]
+        "GoalAlign", "PathAlign", "PathDist", "GoalDist"]
+
       # critics:
       #   ["RotateToGoal", "Oscillation", "BaseObstacle",
       #    "PathDist", "GoalDist" ,"ObstacleFootprint"]
 
       BaseObstacle.scale: 0.02
-      # ObstacleFootprint.scale: 0.015
       PathAlign.scale: 32.0
       PathAlign.forward_point_distance: 0.1
       GoalAlign.scale: 24.0
       GoalAlign.forward_point_distance: 0.1
-      Oscillation.scale: 1.0
       PathDist.scale: 32.0
       GoalDist.scale: 24.0
       RotateToGoal.scale: 32.0
       RotateToGoal.slowing_factor: 5.0
       RotateToGoal.lookahead_time: -1.0
+
    
     FollowPath_WindowDynamicPurePursuit:
       plugin: "nav2_rotation_shim_controller::RotationShimController"
@@ -224,15 +206,15 @@ local_costmap:
       publish_frequency: 2.0
       global_frame: odom
       robot_base_frame: base_link
-      use_sim_time: false
+      use_sim_time: False
       robot_radius: 0.255
       resolution: 0.05
       always_send_full_costmap: True
       rolling_window: true
       width: 4
       height: 4
-
       plugins: ["obstacle_layer", "voxel_layer", "inflation_layer"]
+
 
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
@@ -252,7 +234,7 @@ local_costmap:
 
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
-        cost_scaling_factor: 2.0     # ↓ cost mượt hơn  
+        cost_scaling_factor: 3.0       
         inflation_radius: 0.6 # At least >= robot_radius (55cm)   # ↑ né xa hơn
 
 

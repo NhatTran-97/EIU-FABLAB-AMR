@@ -28,7 +28,7 @@ PDMotionPlanner::PDMotionPlanner() : Node("pd_motion_planner_node"), kp_(2.0), k
   max_angular_velocity_ = get_parameter("max_angular_velocity").as_double();
 
   path_sub_ = create_subscription<nav_msgs::msg::Path>(
-      "/a_star/path", 10, std::bind(&PDMotionPlanner::pathCallback, this, std::placeholders::_1));
+      "/waypoint_path", 10, std::bind(&PDMotionPlanner::pathCallback, this, std::placeholders::_1));
         
   cmd_pub_ = create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
 

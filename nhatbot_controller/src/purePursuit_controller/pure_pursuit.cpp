@@ -7,7 +7,7 @@
 
 namespace nhatbot_controller
 {
-PurePursuit::PurePursuit() : Node("pure_pursuit_motion_planner_node"), look_ahead_distance_(0.3), max_linear_velocity_(0.5), max_angular_velocity_(0.6)
+PurePursuit::PurePursuit() : Node("pure_pursuit_motion_planner_node"), look_ahead_distance_(0.3), max_linear_velocity_(0.5), max_angular_velocity_(1.0)
 {
   tf_buffer_ = std::make_shared<tf2_ros::Buffer>(get_clock());
   tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_);
@@ -20,7 +20,7 @@ PurePursuit::PurePursuit() : Node("pure_pursuit_motion_planner_node"), look_ahea
   max_angular_velocity_ = get_parameter("max_angular_velocity").as_double();
 
   path_sub_ = create_subscription<nav_msgs::msg::Path>(
-    "/plan", 10, std::bind(&PurePursuit::pathCallback, this, std::placeholders::_1));
+    "/waypoint_path", 10, std::bind(&PurePursuit::pathCallback, this, std::placeholders::_1));
         
   cmd_pub_ = create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 10);
 
@@ -90,16 +90,14 @@ void PurePursuit::controlLoop()
   geometry_msgs::msg::Twist cmd_vel;
   if (curvature < 0.0)
   {
-    cmd_vel.angular.z = (std::max(curvature, -deg_to_rad(10)));
+    cmd_vel.angular.z = (std::max(curvature, -deg_to_rad(15)));
   }
   else
   {
-    cmd_vel.angular.z = (std::min(curvature,  deg_to_rad(10))) ;
+    cmd_vel.angular.z = (std::min(curvature,  deg_to_rad(15))) ;
   }
-// double limit_rad = deg_to_rad(10.0);
 
-// cmd_vel.angular.z = std::clamp(curvature, -limit_rad, limit_rad);
-  cmd_vel.linear.x = 0.25;
+  cmd_vel.linear.x = 0.35;
 
 
             
@@ -189,3 +187,5 @@ int main(int argc, char *argv[])
     rclcpp::shutdown();
     return 0;
 }
+
+
