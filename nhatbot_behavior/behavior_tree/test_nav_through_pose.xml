@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root BTCPP_format="3">
+  <BehaviorTree ID="MainTree">
+    <PipelineSequence name="NavigateWithReplanning">
+      <ComputePathThroughPoses goals="{goals}"
+                               planner_id="GridBased_ThetaStarPlanner_nav2"
+                               path="{path}"/>
+      <FollowPath controller_id="FollowPath_DWB"
+                  path="{path}"/>
+    </PipelineSequence>
+  </BehaviorTree>
+</root>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- <root BTCPP_format="4">
+  <BehaviorTree ID="Untitled">
+    <Sequence>
+      <ComputePathToPose goal="{goal}" planner_id="GridBased_ThetaStarPlanner_nav2" path="{path}"/>
+      <FollowPath controller_id="FollowPath_DWB" path="{path}"/>
+    </Sequence>
+  </BehaviorTree>
+</root> -->
+
+
+<root BTCPP_format="4">
+  <BehaviorTree ID="MainTree">
+    <PipelineSequence>
+      <ComputePathToPose
+          goal="{goal}"
+          planner_id="GridBased_ThetaStarPlanner_nav2"
+          path="{path}"/>
+      <FollowPath
+          controller_id="FollowPath_DWB"
+          path="{path}"/>
+    </PipelineSequence>
+  </BehaviorTree>
+</root>

@@ -17,7 +17,7 @@ public:
 
   FollowPathClient(): Node("follow_path_client")
   {
-    client_ = rclcpp_action::create_client<FollowPath>(this,"/follow_path");
+    client_ = rclcpp_action::create_client<FollowPath>(this,"/follow_path"); 
 
     path_sub_ = this->create_subscription<nav_msgs::msg::Path>("/plan", 10, std::bind(&FollowPathClient::pathCallback, this, std::placeholders::_1));
 

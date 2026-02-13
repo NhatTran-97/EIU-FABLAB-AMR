@@ -10,36 +10,36 @@ def generate_launch_description():
 
     use_sim_time = LaunchConfiguration("use_sim_time")
  
-    lifecycle_nodes = ["smoother_server", "planner_server", "controller_server"]   # 
-
-    
-
+    # lifecycle_nodes = ["planner_server","smoother_server", "controller_server", "behavior_server", "bt_navigator"] 
+    lifecycle_nodes = ["planner_server","smoother_server", "controller_server", "bt_navigator"]   #     
     use_sim_time_arg = DeclareLaunchArgument("use_sim_time", default_value="false",)
 
     compute_path_node =Node(
         package='nhatbot_navigation',
         executable='compute_path_client',
         name='compute_path_client',
+        output='screen',)
+    
+    follow_path_node =Node(
+        package='nhatbot_navigation',
+        executable='follow_path_client',
+        name='follow_path_client',
+        output='screen',)
+
+    waypoint_follower_node =Node(
+        package='nav2_waypoint_follower',
+        executable='waypoint_follower',
+        name='waypoint_follower',
         output='screen',
+        parameters=[os.path.join(get_package_share_directory("nhatbot_planner"), "config", "waypoint_follower.yaml"), {"use_sim_time": use_sim_time}]
     )
-
-
 
     global_costmap =Node(
         package='nav2_costmap_2d',
         executable='nav2_costmap_2d',
         name='global_costmap',
         output='screen',
-        parameters=[os.path.join(get_package_share_directory("nhatbot_planner"), "config", "costmap.yaml"), {"use_sim_time": use_sim_time}]
-    )
-
-    controller_server =Node(
-        package='nav2_controller',
-        executable='controller_server',
-        name='controller_server',
-        output='screen',
-        parameters=[os.path.join(get_package_share_directory("nhatbot_controller"), "config", "controller_server.yaml"), {"use_sim_time": use_sim_time}]
-    )
+        parameters=[os.path.join(get_package_share_directory("nhatbot_planner"), "config", "costmap.yaml"), {"use_sim_time": use_sim_time}])
 
 
 
@@ -49,8 +49,7 @@ def generate_launch_description():
         name="planner_server",
         output="screen",
         parameters=[
-            os.path.join(get_package_share_directory("nhatbot_planner"), "config", "planner_server.yaml"),
-            {"use_sim_time": use_sim_time}],)
+            os.path.join(get_package_share_directory("nhatbot_planner"), "config", "planner_server.yaml"), {"use_sim_time": use_sim_time}],)
 
     nav2_smoother_server = Node(
         package="nav2_smoother",
@@ -59,9 +58,30 @@ def generate_launch_description():
         output="screen",
         parameters=[
             os.path.join(
-                get_package_share_directory("nhatbot_planner"),"config", "smoother_server.yaml"),
-            {"use_sim_time": use_sim_time}],)
+                get_package_share_directory("nhatbot_planner"),"config", "smoother_server.yaml"), {"use_sim_time": use_sim_time}],)
+    
+    controller_server =Node(
+        package='nav2_controller',
+        executable='controller_server',
+        name='controller_server',
+        output='screen',
+        parameters=[os.path.join(get_package_share_directory("nhatbot_controller"), "config", "controller_server.yaml"), {"use_sim_time": use_sim_time}])
 
+    nav2_bt_navigator = Node(
+        package="nav2_bt_navigator",
+        executable="bt_navigator",
+        name="bt_navigator",
+        output="screen",
+        parameters=[
+            os.path.join(get_package_share_directory("nhatbot_behavior"),"config", "bt_navigator.yaml"), {"use_sim_time": use_sim_time}],)
+  
+    nav2_behaviors = Node(
+        package="nav2_behaviors",
+        executable="behavior_server",
+        name="behavior_server",
+        output="screen",
+        parameters=[
+            os.path.join(get_package_share_directory("nhatbot_behavior"),"config", "behavior_server.yaml"), {"use_sim_time": use_sim_time}],)
 
     nav2_lifecycle_manager = Node(
         package="nav2_lifecycle_manager",
@@ -80,11 +100,12 @@ def generate_launch_description():
 
     return LaunchDescription([
         use_sim_time_arg,
+        # compute_path_node,follow_path_node, 
         nav2_planner_server,
-        compute_path_node,
         nav2_smoother_server,
-        # global_costmap,
         controller_server,
+        # nav2_behaviors,
+        nav2_bt_navigator,
         nav2_lifecycle_manager,
         
 
